@@ -9,7 +9,7 @@ import {
 } from '@mui/icons-material';
 import {Box, Breadcrumbs, Divider, Link, List, ListItemIcon, ListItemText, Typography} from '@material-ui/core'
 import { Avatar, ListItemButton } from '@mui/material';
-import { StyledProfileBadge } from '../../components/CustomStyles';
+import { StyledProfileBadge } from '../../components/custom-components';
 
 export default function Profile(props) {
     let history = createBrowserHistory({forceRefresh:true});

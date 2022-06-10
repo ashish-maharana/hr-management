@@ -1,6 +1,6 @@
 import React, {useEffect, useMemo, useState} from 'react';
 import { createBrowserHistory } from 'history';
-import ApiClient from "../../config";
+import ApiClient from "../../../config";
 import {toast} from "react-toastify";
 import { MDBCard, MDBCardBody, MDBCol, MDBContainer, MDBDataTable, MDBRow } from 'mdbreact';
 import {
@@ -14,7 +14,7 @@ import 'flatpickr/dist/flatpickr.css'
 import 'react-toastify/dist/ReactToastify.css';
 import "react-datepicker/dist/react-datepicker.css";
 
-export default function LeaveApplication() {
+export default function ApplyLeaveApplication() {
     let history = createBrowserHistory({forceRefresh:true});
     const userDataFetched = JSON.parse(localStorage.getItem('users'));
     const [allLeaveTypes, setAllLeaveTypes] = useState([])
@@ -22,16 +22,16 @@ export default function LeaveApplication() {
         day_type: true,
         from_date: '',
         to_date:'',
+        reason:'',
+        leave_type_id:'',
     });
     const {day_type, from_date, to_date} = leaveApplication;
-    const [leaveTypesData, setLeaveTypesData] = useState([]);
-    const userData = localStorage.getItem('users');
     const skip_weekends = [1,2,3,4,5];
     const onInputChange = (e) => {
         if(e.target.name === 'day_type'){
             e.target.value === 'true' ? 
-                setLeaveApplication({ ...leaveApplication, from_date:"", to_date:"", [e.target.name]: true })
-            : setLeaveApplication({ ...leaveApplication, from_date:"", to_date:"", [e.target.name]: false });
+                setLeaveApplication({...leaveApplication, to_date:'', [e.target.name]: true})
+            : setLeaveApplication({...leaveApplication, [e.target.name]: false});
         }else{
             setLeaveApplication({ ...leaveApplication, [e.target.name]: e.target.value });
         }
@@ -42,20 +42,6 @@ export default function LeaveApplication() {
             localStorage.removeItem('users')
             localStorage.removeItem('token')            
             return history.push("/login")
-        }
-    }
-
-    const deleteLeaveType = (id) => {
-        if (confirm('Are you sure you want to delete this leave-type?')) {
-            ApiClient.post('/api/leave-types/delete-leave-type/' + id)
-            .then(response => {
-                if(response.data){
-                    toast.success('Record deleted successfully')
-                    return history.push("/leave-types")
-                }
-            });
-        }else{
-            return toast.error('Something went wrong try again')
         }
     }
 
@@ -87,80 +73,38 @@ export default function LeaveApplication() {
             return <option key={key} value={val.name}>{val.name}</option>
         });
         return (
-            <select className="form-control" label="Role" name="default_role" onChange={e => onInputChange(e)}>
+            <select className="form-control" label="Leave Types" name="leave_type_id" onChange={e => onInputChange(e)}>
                 <option hidden> ---- Select Leave Type ---- </option>
                 {fetchLeaveTypes}
             </select>
         )
     };
 
-    useMemo(()=>{
-        ApiClient.get('/api/leave-types/')
+    const sendLeaveAppData = () =>
+    {
+        if(leaveApplication.from_date === ''){
+            return toast.error('From Date Field is empty')
+        }else if(leaveApplication.leave_type_id === ''){
+            return toast.error('Leave Type Field is empty')
+        }else if(leaveApplication.reason === ''){
+            return toast.error('Reason Field is empty')
+        }
+
+        ApiClient.post('/api/leave-applications/apply-leave-application/',leaveApplication)
         .then(response => {
-            let postsArray = [];
-            JSON.parse(JSON.stringify(response.data)).map((item, index) => {
-                item.ids = (
-                    <div className='text-center'>
-                        {index+1}
-                    </div>
-                );
-                item.leave_type = (
-                    <div className='d-flex align-items-center'>
-                        {item.name}
-                    </div>
-                );
-                item.actions = (
-                    <div className='text-center d-flex'>
-                        <div className='mx-1 rounded custom-actions'>
-                            <EditRecord className='action-icon-style' onClick={() => {history.push(`/leave-types/edit-leave-types/${item.id}`)}}/>
-                        </div>
-                        <div className='mx-1 rounded custom-actions'>
-                            <DeleteRecord className='action-icon-style' onClick={()=>{deleteLeaveType(item.id)}} /> 
-                        </div>
-                    </div>  
-                );
-                postsArray.push(item);
-            });
-            setLeaveTypesData(postsArray)
-        });
-    },[userData]);
-    
-    const data = {
-        columns: [
-            {
-                label: 'ID',
-                field: 'ids',
-                sort: 'asc',
-                width: 150,
-                attributes: {className: 'text-center'}
-                },
-            {
-                label: 'Leave Type',
-                field: 'leave_type',
-                sort: 'asc',
-                width: 150
-            },
-            {
-                label: 'Days Allowed',
-                field: 'no_of_days_allowed',
-                sort: 'asc',
-                width: 150
-            },
-            {
-                label: 'Description',
-                field: 'description',
-                sort: 'asc',
-                width: 150
-            },
-            {
-                label: 'Actions',
-                field: 'actions',
-                width: 100,
-                attributes: {className: 'text-center'}
+            if(response.status === 201){
+                toast.error("Leave already applied wait for the response from the admin")
+            }else if(response.status === 200){
+                toast.success("Leave Applied Successfully")
+                setLeaveType({from_date:'',to_date:'',reason:'',leave_type_id:''})
+            }else{
+                toast.error('Something went wrong try again')
+                setLeaveType({from_date:'',to_date:'',reason:'',leave_type_id:''})
             }
-        ],
-        rows: leaveTypesData
-    };
+        });
+        // history.push("/leave-types")
+    }
+    console.log("Leave APP Data =>\n", leaveApplication)
     return (
         <div className="container mt-5">
             <div className="row justify-content-center">
@@ -172,7 +116,7 @@ export default function LeaveApplication() {
                                 <Link underline="hover" color="inherit" href="/">
                                     Dashboard
                                 </Link>
-                                <Typography className='text-black'>Leave Types</Typography>
+                                <Typography className='text-black'>Leave Application</Typography>
                             </Breadcrumbs>
                         </div>
                         <div className='col-md-6'>
@@ -189,14 +133,14 @@ export default function LeaveApplication() {
                                 <div className="card-body">
                                     <div className="row">
                                         <div className="form-group mt-2 col-sm-6">
-                                            {getAllLeaveTypes()}
-                                        </div>
-                                        <div className="form-group mt-2 col-sm-6">
                                             <select className="form-control custom-options" label="day_type" name="day_type" onChange={e => onInputChange(e)}>
                                                 <option hidden> - Select No. Of Days Type - </option>
-                                                <option value={true} selected>One Day</option>
+                                                <option value={true} defaultValue={true}>One Day</option>
                                                 <option value={false}>More than One Day</option>
                                             </select>
+                                        </div>
+                                        <div className="form-group mt-2 col-sm-6">
+                                            {getAllLeaveTypes()}
                                         </div>
                                     </div>
                                     {day_type ?
@@ -261,10 +205,10 @@ export default function LeaveApplication() {
                                         <input type="file" className="form-control" label="Attachment" name="attachment" onChange={e => onInputChange(e)} required/>
                                     </div>
                                     <div className="form-group mt-3">
-                                        <textarea defaultValue={''} className='form-control' name='description' rows="3" placeholder="Provide a reason for the leave.." onChange={e => onInputChange(e)}></textarea>
+                                        <textarea defaultValue={''} className='form-control' name='reason' rows="3" placeholder="Provide a reason for the leave.." onChange={e => onInputChange(e)}></textarea>
                                     </div>
                                     <hr/>
-                                    <button type="submit" className="btn btn-primary" onClick={()=>{alert('do nothing')}}>Submit</button>  
+                                    <button type="submit" className="btn btn-primary" onClick={sendLeaveAppData}>Submit</button>  
                                 </div>
                             </div>
                         </div>
@@ -306,21 +250,6 @@ export default function LeaveApplication() {
                                         />}
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                    <div className="card mt-3">
-                        <div className="card-header">
-                            <strong>Leave Requests</strong>
-                            <AddLeaveTypesIcon className='text-align-right add-icon-style' onClick={()=>{history.push('/leave-types/add-leave-types')}}/> 
-                        </div>
-                        <div className="card-body">
-                            <MDBDataTable
-                                striped 
-                                bordered 
-                                small
-                                entries={5}
-                                data={data}
-                            />
                         </div>
                     </div>
                 </div>

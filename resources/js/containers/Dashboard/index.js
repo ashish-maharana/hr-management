@@ -6,7 +6,7 @@ import ApiClient from "../../config";
 import { ArrowRight as PunchIn, ArrowLeft as PunchOut, EventNote as LeaveRequests, EventAvailable as LeaveApproved, EventBusy as LeaveDeclined, TouchApp as PresentToday, AccountBox as EditProfile, PowerSettingsNewTwoTone as PowerOff, GroupRounded as TotalEmployees, CalendarMonth as TotalLeaves, Sick as SickLeave, Event as CasualLeaves, Settings as ManageRoles, AdminPanelSettings as ManagePermissions} from '@mui/icons-material';
 import { MDBDataTable } from 'mdbreact';
 import { Avatar, Link } from '@mui/material';
-import { StyledBadge } from '../../components/CustomStyles';
+import { StyledBadge } from '../../components/custom-components';
 
 export default function Dashboard() {
     let history = createBrowserHistory({forceRefresh:true});

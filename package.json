@@ -33,6 +33,7 @@
         "@mui/icons-material": "^5.8.0",
         "@mui/styled-engine": "^5.8.0",
         "autoprefixer": "10.4.5",
-        "mdbreact": "^5.2.0"
+        "mdbreact": "^5.2.0",
+        "react-datepicker": "^4.8.0"
     }
 }

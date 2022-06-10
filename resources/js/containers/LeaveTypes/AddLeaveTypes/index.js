@@ -29,8 +29,6 @@ export default function AddLeaveTypes() {
             return toast.error('Leave Type Field is empty')
         }else if(leaveType.description === ''){
             return toast.error('Description Field is empty')
-        }else if(leaveType.no_of_days_allowed === ''){
-            return toast.error('No. of days allowed Field is empty')
         }
 
         ApiClient.post('/api/leave-types/add-leave-type/',leaveType)
@@ -45,6 +43,7 @@ export default function AddLeaveTypes() {
                 setLeaveType({name:"",description:"",no_of_days_allowed:""})
             }
         });
+        history.push("/leave-types")
     }
 
     const logOut = () => {

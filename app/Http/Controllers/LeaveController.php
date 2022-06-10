@@ -60,7 +60,7 @@ class LeaveController extends BaseController
         }
     }
 
-    public function getAllLeaveType()
+    public function getAllLeaveTypes()
     {
         try{
             $leaveTypes = LeaveType::get();
@@ -104,4 +104,10 @@ class LeaveController extends BaseController
         }
     }
 
+    // Leave Application API's
+
+    public function applyLeaveApplication(Request $request)
+    {
+        dd($request);
+    }
 }

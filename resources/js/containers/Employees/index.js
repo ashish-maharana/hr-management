@@ -7,7 +7,7 @@ import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import {Breadcrumbs, Link, Typography} from '@material-ui/core'
 import { Avatar } from '@mui/material';
-import { StyledBadge } from '../../components/CustomStyles';
+import { StyledBadge } from '../../components/custom-components';
 import { MDBDataTable } from 'mdbreact';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';

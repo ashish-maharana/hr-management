@@ -51,10 +51,18 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::prefix('/leave-types')->group(function () {
         Route::get('/', [LeaveController::class, 'index']);
-        Route::get('/get-all-leave-types', [LeaveController::class, 'getAllLeaveType']);
+        Route::get('/get-all-leave-types', [LeaveController::class, 'getAllLeaveTypes']);
         Route::post('/add-leave-type', [LeaveController::class, 'addLeaveType']);
         Route::post('/edit-leave-type', [LeaveController::class, 'editLeaveType']);
         Route::get('/get-leave-type/{id}', [LeaveController::class, 'getLeaveType']);
         Route::post('/delete-leave-type/{id}', [LeaveController::class, 'deleteLeaveType']);
+    });
+
+    Route::prefix('/leave-applications')->group(function () {
+        Route::get('/get-all-leave-appicaiton', [LeaveController::class, 'getAllLeaveApplications']);
+        Route::post('/apply-leave-application', [LeaveController::class, 'applyLeaveApplication']);
+        Route::post('/edit-leave-application', [LeaveController::class, 'editLeaveApplication']);
+        Route::get('/get-leave-applicaition/{id}', [LeaveController::class, 'getLeaveApplication']);
+        Route::post('/delete-leave-application/{id}', [LeaveController::class, 'deleteLeaveApplication']);
     });
 });

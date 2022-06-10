@@ -20,7 +20,7 @@ import EditPermissions from "../Permissions/EditPermissions";
 import LeaveTypesPage from "../LeaveTypes";
 import AddLeaveTypes from "../LeaveTypes/AddLeaveTypes";
 import EditLeaveTypes from "../LeaveTypes/EditLeaveTypes";
-import LeaveApplication from "../LeaveApplication";
+import LeaveApplication from "../LeaveApplication/ApplyLeaveApplication";
 import ProfilePage from "../Profile";
 
 const AdminProtectedRoute = ({component: Component, ...rest}) => {
