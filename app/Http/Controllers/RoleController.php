@@ -17,7 +17,7 @@ class RoleController extends BaseController
             $roles = Role::get();
             return response()->json($roles);
         }catch (\Exception $e){
-            return $this->sendError('something went wrong', [], 500);
+            return $this->sendError($e, [], 500);
         }
     }
 
@@ -38,7 +38,7 @@ class RoleController extends BaseController
             $role = Role::create($input);
             return $this->sendResponse($role, 'Role added successfully.', 200);
         }catch (\Exception $e){
-            return $this->sendError('something went wrong', [], 500);
+            return $this->sendError($e, [], 500);
         }
     }
 
@@ -54,7 +54,7 @@ class RoleController extends BaseController
             $role = Role::find($id);
             return response()->json($role);
         }catch (\Exception $e){
-            return $this->sendError('something went wrong', [], 500);
+            return $this->sendError($e, [], 500);
         }
     }
 
@@ -64,7 +64,7 @@ class RoleController extends BaseController
             $roles = Role::get();
             return response()->json($roles->toArray());
         }catch (\Exception $e){
-            return $this->sendError('something went wrong', [], 500);
+            return $this->sendError($e, [], 500);
         }
     }
     /**
@@ -81,7 +81,7 @@ class RoleController extends BaseController
             $role = Role::updateOrCreate(['id' => $request->id],$data);
             return $this->sendResponse($role, 'Role has been updated successfully.', 200);
         } catch (\Exception $e) {
-            return $this->sendError('something went wrong', [], 500);
+            return $this->sendError($e, [], 500);
         }
     }
 
@@ -98,7 +98,7 @@ class RoleController extends BaseController
             return $this->sendResponse($role, 'Role deleted successfully.', 200);
         }catch (\Exception $e) {
             // return $this->sendError('Something went wrong', $e->getMessage(), 500);
-            return $this->sendError('something went wrong', [], 500);
+            return $this->sendError($e, [], 500);
         }
     }
 

@@ -22,7 +22,7 @@ class EmployeesController extends BaseController
             }
             return response()->json($employees);
         }catch (\Exception $e){
-            return $this->sendError('something went wrong', [], 500);
+            return $this->sendError($e, [], 500);
         }
     }
     
@@ -42,7 +42,7 @@ class EmployeesController extends BaseController
             $user->assignRole($request->default_role);
             return $this->sendResponse($user, 'User added successfully.', 200);
         }catch (\Exception $e){
-            return $this->sendError('something went wrong', [], 500);
+            return $this->sendError($e, [], 500);
         }
     }
 
@@ -56,7 +56,7 @@ class EmployeesController extends BaseController
             $user['roleName'] = $user->getRoleNames();
             return response()->json($user);
         }catch (\Exception $e){
-            return $this->sendError('something went wrong', [], 500);
+            return $this->sendError($e, [], 500);
         }
     }
 
@@ -75,7 +75,7 @@ class EmployeesController extends BaseController
             $user->syncRoles($request->default_role);
             return $this->sendResponse($user, 'User has been updated successfully.', 200);
         } catch (\Exception $e) {
-            return $this->sendError('something went wrong', [], 500);
+            return $this->sendError($e, [], 500);
         }
     }
 
@@ -89,7 +89,7 @@ class EmployeesController extends BaseController
             $user = User::where('id', $id)->delete();
             return $this->sendResponse($user, 'User deleted successfully.', 200);
         }catch (\Exception $e){
-            return $this->sendError('something went wrong', [], 500);
+            return $this->sendError($e, [], 500);
         }
     }
 
@@ -122,7 +122,7 @@ class EmployeesController extends BaseController
             ]);
             return $this->sendResponse($profile, 'User profile updated successfully.', 200);
         } catch (\Exception $e) {
-            return $this->sendError('something went wrong', [], 500);
+            return $this->sendError($e, [], 500);
         }
     }
 }

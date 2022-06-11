@@ -17,7 +17,7 @@ class LeaveApplication extends Model
         'to_date',
         'attachment',
         'leave_status',
-        'remarks',
+        'reason',
         'date_of_approval'
     ];
 }

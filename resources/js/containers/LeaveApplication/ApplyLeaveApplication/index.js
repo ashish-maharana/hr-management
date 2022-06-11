@@ -18,20 +18,24 @@ export default function ApplyLeaveApplication() {
     let history = createBrowserHistory({forceRefresh:true});
     const userDataFetched = JSON.parse(localStorage.getItem('users'));
     const [allLeaveTypes, setAllLeaveTypes] = useState([])
+    const [day_type, setDayType] = useState(true)
     const [leaveApplication, setLeaveApplication] = useState({
-        day_type: true,
         from_date: '',
         to_date:'',
         reason:'',
         leave_type_id:'',
     });
-    const {day_type, from_date, to_date} = leaveApplication;
+    const {from_date, to_date} = leaveApplication;
     const skip_weekends = [1,2,3,4,5];
     const onInputChange = (e) => {
         if(e.target.name === 'day_type'){
-            e.target.value === 'true' ? 
-                setLeaveApplication({...leaveApplication, to_date:'', [e.target.name]: true})
-            : setLeaveApplication({...leaveApplication, [e.target.name]: false});
+            if(e.target.value === 'true'){
+                setLeaveApplication({...leaveApplication, to_date:''})
+                setDayType(true)
+            }else{
+                setLeaveApplication({...leaveApplication})  
+                setDayType(false)
+            }
         }else{
             setLeaveApplication({ ...leaveApplication, [e.target.name]: e.target.value });
         }
@@ -70,7 +74,7 @@ export default function ApplyLeaveApplication() {
 
     const getAllLeaveTypes = () => {
         let fetchLeaveTypes = Object.entries(allLeaveTypes).map(([key, val]) => {
-            return <option key={key} value={val.name}>{val.name}</option>
+            return <option key={key} value={val.id}>{val.name}</option>
         });
         return (
             <select className="form-control" label="Leave Types" name="leave_type_id" onChange={e => onInputChange(e)}>
@@ -102,9 +106,9 @@ export default function ApplyLeaveApplication() {
                 setLeaveType({from_date:'',to_date:'',reason:'',leave_type_id:''})
             }
         });
-        // history.push("/leave-types")
+        history.push("/leave-applications")
     }
-    console.log("Leave APP Data =>\n", leaveApplication)
+    console.log("Leave APP Data =>\n", day_type)
     return (
         <div className="container mt-5">
             <div className="row justify-content-center">
@@ -133,9 +137,9 @@ export default function ApplyLeaveApplication() {
                                 <div className="card-body">
                                     <div className="row">
                                         <div className="form-group mt-2 col-sm-6">
-                                            <select className="form-control custom-options" label="day_type" name="day_type" onChange={e => onInputChange(e)}>
+                                            <select className="form-control custom-options" label="day_type" name="day_type" onChange={e => onInputChange(e)} defaultValue={true}>
                                                 <option hidden> - Select No. Of Days Type - </option>
-                                                <option value={true} defaultValue={true}>One Day</option>
+                                                <option value={true}>One Day</option>
                                                 <option value={false}>More than One Day</option>
                                             </select>
                                         </div>

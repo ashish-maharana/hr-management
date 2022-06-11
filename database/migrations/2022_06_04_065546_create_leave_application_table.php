@@ -13,7 +13,7 @@ class CreateLeaveApplicationTable extends Migration
      */
     public function up()
     {
-        Schema::create('leave_application', function (Blueprint $table) {
+        Schema::create('leave_applications', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('leave_type_id')->comment('leave types from leave types table');
             $table->unsignedBigInteger('user_id')->comment('person who applied for leave-application');
@@ -43,6 +43,6 @@ class CreateLeaveApplicationTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('leave_application');
+        Schema::dropIfExists('leave_applications');
     }
 }

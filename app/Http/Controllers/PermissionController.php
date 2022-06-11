@@ -17,7 +17,7 @@ class PermissionController extends BaseController
             $permissions = Permission::get();
             return response()->json($permissions);
         }catch (\Exception $e){
-            return $this->sendError('something went wrong', [], 500);
+            return $this->sendError($e, [], 500);
         }
     }
 
@@ -38,7 +38,7 @@ class PermissionController extends BaseController
             $permission = Permission::create($input);
             return $this->sendResponse($permission, 'Permission added successfully.', 200);
         }catch (\Exception $e){
-            return $this->sendError('something went wrong', [], 500);
+            return $this->sendError($e, [], 500);
         }
     }
 
@@ -54,7 +54,7 @@ class PermissionController extends BaseController
             $permission = Permission::find($id);
             return response()->json($permission);
         }catch (\Exception $e){
-            return $this->sendError('something went wrong', [], 500);
+            return $this->sendError($e, [], 500);
         }
     }
 
@@ -72,7 +72,7 @@ class PermissionController extends BaseController
             $permission = Permission::updateOrCreate(['id' => $request->id],$data);
             return $this->sendResponse($permission, 'Permission has been updated successfully.', 200);
         } catch (\Exception $e) {
-            return $this->sendError('something went wrong', [], 500);
+            return $this->sendError($e, [], 500);
         }
     }
 
@@ -89,7 +89,7 @@ class PermissionController extends BaseController
             return $this->sendResponse($permission, 'Permission deleted successfully.', 200);
         }catch (\Exception $e) {
             // return $this->sendError('Something went wrong', $e->getMessage(), 500);
-            return $this->sendError('something went wrong', [], 500);
+            return $this->sendError($e, [], 500);
         }
     }
 

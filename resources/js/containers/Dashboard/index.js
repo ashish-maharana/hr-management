@@ -128,7 +128,9 @@ export default function Dashboard() {
                                     </div> : 
                                     <div className='col-md-9'>
                                         <span className='rounded custom-badge-punch-in text-align-right' onClick={()=>{history.push('/')}}>Punch In<PunchIn className='svg-icon-punch-in'/></span> 
-                                        <span className='mx-2 rounded custom-auths text-align-right' onClick={()=>{history.push('/leave-application')}}>Apply Leave<TotalLeaves className='svg-icon-lighblue'/></span>
+                                        <span className='mx-2 rounded custom-auths text-align-right' onClick={()=>{history.push('/leave-applications')}}>Leave Applications<TotalLeaves className='svg-icon-lighblue'/></span>
+                                        <span className='mx-2 rounded custom-auths text-align-right' onClick={()=>{history.push('/apply-leave')}}>Apply Leave<TotalLeaves className='svg-icon-lighblue'/></span>
+                                        
                                     </div> 
                                 }
                             </div>

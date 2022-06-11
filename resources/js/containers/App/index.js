@@ -20,7 +20,8 @@ import EditPermissions from "../Permissions/EditPermissions";
 import LeaveTypesPage from "../LeaveTypes";
 import AddLeaveTypes from "../LeaveTypes/AddLeaveTypes";
 import EditLeaveTypes from "../LeaveTypes/EditLeaveTypes";
-import LeaveApplication from "../LeaveApplication/ApplyLeaveApplication";
+import ApplyLeaveApplication from "../LeaveApplication/ApplyLeaveApplication";
+import LeaveApplication from "../LeaveApplication";
 import ProfilePage from "../Profile";
 
 const AdminProtectedRoute = ({component: Component, ...rest}) => {
@@ -71,7 +72,8 @@ return(
                     {/* Profile Management Routes */}
                     <ProtectedRoute exact path="/profile" component={ProfilePage} />
 
-                    <ProtectedRoute exact path="/leave-application" component={LeaveApplication} />
+                    <ProtectedRoute exact path="/apply-leave" component={ApplyLeaveApplication} />
+                    <ProtectedRoute exact path="/leave-applications" component={LeaveApplication} />
             </Switch>
         </BrowserRouter>
     </div>

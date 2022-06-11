@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Controllers\BaseController as BaseController;
 use App\Models\LeaveType;
+use App\Models\LeaveApplication;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
+use Carbon\Carbon;
 
 
 class LeaveController extends BaseController
@@ -19,7 +21,7 @@ class LeaveController extends BaseController
             $leaveTypes = LeaveType::get();
             return response()->json($leaveTypes);
         }catch (\Exception $e){
-            return $this->sendError('something went wrong', [], 500);
+            return $this->sendError($e, [], 500);
         }
     }
 
@@ -40,7 +42,7 @@ class LeaveController extends BaseController
             $leaveType = LeaveType::create($input);
             return $this->sendResponse($leaveType, 'Leave Type added successfully.', 200);
         }catch (\Exception $e){
-            return $this->sendError('something went wrong', [], 500);
+            return $this->sendError($e, [], 500);
         }
     }
 
@@ -56,7 +58,7 @@ class LeaveController extends BaseController
             $leaveType = LeaveType::find($id);
             return response()->json($leaveType);
         }catch (\Exception $e){
-            return $this->sendError('something went wrong', [], 500);
+            return $this->sendError($e, [], 500);
         }
     }
 
@@ -66,7 +68,7 @@ class LeaveController extends BaseController
             $leaveTypes = LeaveType::get();
             return response()->json($leaveTypes->toArray());
         }catch (\Exception $e){
-            return $this->sendError('something went wrong', [], 500);
+            return $this->sendError($e, [], 500);
         }
     }
     /**
@@ -83,7 +85,7 @@ class LeaveController extends BaseController
             $leaveType = LeaveType::updateOrCreate(['id' => $request->id],$data);
             return $this->sendResponse($leaveType, 'Leave Type has been updated successfully.', 200);
         } catch (\Exception $e) {
-            return $this->sendError('something went wrong', [], 500);
+            return $this->sendError($e, [], 500);
         }
     }
 
@@ -100,7 +102,7 @@ class LeaveController extends BaseController
             return $this->sendResponse($leaveType, 'Leave Type deleted successfully.', 200);
         }catch (\Exception $e) {
             // return $this->sendError('Something went wrong', $e->getMessage(), 500);
-            return $this->sendError('something went wrong', [], 500);
+            return $this->sendError($e, [], 500);
         }
     }
 
@@ -108,6 +110,20 @@ class LeaveController extends BaseController
 
     public function applyLeaveApplication(Request $request)
     {
-        dd($request);
+        try{
+            $user = Auth::user();
+            $isLeaveAppExist = LeaveApplication::where('user_id', '=' , $user->id)->where('leave_status', 0)->first();
+            if($isLeaveAppExist){
+                return $this->sendResponse($isLeaveAppExist, 'Leave Application Pending', 201);
+            }
+            $request['user_id'] = $user->id;
+            $request['leave_type_id'] = intval($request->leave_type_id);
+            $request['date_of_application'] =  Carbon::today()->startOfDay()->format('Y-m-d');
+            $input = $request->all();
+            $leaveType = LeaveApplication::create($input);
+            return $this->sendResponse($leaveType, 'Leave Type added successfully.', 200);
+        }catch (\Exception $e){
+            return $this->sendError($e, [], 500);
+        }
     }
 }
