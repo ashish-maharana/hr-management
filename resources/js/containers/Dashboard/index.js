@@ -1,17 +1,20 @@
-import {React, useState, useEffect} from 'react';
+import {React, useState, useEffect, useMemo} from 'react';
 import { createBrowserHistory } from 'history';
 import {toast} from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import ApiClient from "../../config";
-import { ArrowRight as PunchIn, ArrowLeft as PunchOut, EventNote as LeaveRequests, EventAvailable as LeaveApproved, EventBusy as LeaveDeclined, TouchApp as PresentToday, AccountBox as EditProfile, PowerSettingsNewTwoTone as PowerOff, GroupRounded as TotalEmployees, CalendarMonth as TotalLeaves, Sick as SickLeave, Event as CasualLeaves, Settings as ManageRoles, AdminPanelSettings as ManagePermissions} from '@mui/icons-material';
+import { ArrowRight as PunchIn, ArrowLeft as PunchOut, EventNote as LeaveRequests, EventAvailable as LeaveApproved, EventBusy as LeaveDeclined, TouchApp as PresentToday, AccountBox as EditProfile, PowerSettingsNewTwoTone as PowerOff, GroupRounded as TotalEmployees, CalendarMonth as TotalLeaves, Sick as SickLeave, Event as CasualLeaves, Settings as ManageRoles, AdminPanelSettings as ManagePermissions, Done as ApproveLeave, Close as RejectLeave} from '@mui/icons-material';
 import { MDBDataTable } from 'mdbreact';
 import { Avatar, Link } from '@mui/material';
+import moment from 'moment';
 import { StyledBadge } from '../../components/custom-components';
 
 export default function Dashboard() {
     let history = createBrowserHistory({forceRefresh:true});
     const userDataFetched = JSON.parse(localStorage.getItem('users'));
     const isAdmin = userDataFetched.roleName[0] === 'Admin' ? true : false;
+    const [leaveApplicationsData, setleaveApplicationsData] = useState([]);
+    const userIsActive = localStorage.getItem('users');
     const [userData, setUserData] = useState({
         first_name: "",
         last_name: "",
@@ -38,36 +41,102 @@ export default function Dashboard() {
             });
         }
     }, [userDataFetched.id]);
+    
+    const statusOfLeave = (status) => {
+        let statusArray = {leaveStatus: 'Rejected', statusClass: 'custom-badge-danger'};
+        if(status === 0){
+            statusArray.leaveStatus = 'Pending'
+            statusArray.statusClass = 'custom-actions'
+        }else if(status === 1){
+            statusArray.leaveStatus = 'Approved'
+            statusArray.statusClass = 'custom-badge-success'
+        }
+        return statusArray
+    }
 
+    useMemo(()=>{
+        ApiClient.get('/api/leave-applications/get-all-leave-applications')
+        .then(response => {
+            let postsArray = [];
+            JSON.parse(JSON.stringify(response.data)).map((item, index) => {
+                item.ids = (
+                    <div className='text-center'>
+                        {index+1}
+                    </div>
+                );
+                item.leave_type = (
+                    <div className='text-center d-flex align-items-center'>
+                        {item.leave_types.name}
+                    </div>
+                );
+                item.from_to_date = (
+                    <div className='text-center d-flex align-items-center'>
+                        {item.from_date + " | " + item.to_date}
+                    </div>
+                );
+                item.no_of_days = (
+                    <div className='text-center'>
+                        {moment(item.to_date).diff(item.from_date, 'days')}
+                    </div>
+                );
+                item.status = (
+                    <div className='text-center'>
+                        <div className={`mx-1 rounded ${statusOfLeave(item.leave_status).statusClass}`}>{statusOfLeave(item.leave_status).leaveStatus}</div>
+                    </div>
+                );
+                item.actions = (
+                    <div className='text-center d-flex'>
+                        <div className='mx-1 rounded custom-actions'>
+                            <ApproveLeave className='action-icon-style' onClick={() => {history.push(`/leave-types/edit-leave-types/${item.id}`)}}/>
+                        </div>
+                        <div className='mx-1 rounded custom-actions'>
+                            <RejectLeave className='action-icon-style' onClick={() => {history.push(`/leave-types/edit-leave-types/${item.id}`)}}/>
+                        </div>
+                    </div>  
+                );
+                postsArray.push(item);
+            });
+            setleaveApplicationsData(postsArray)
+        });
+    },[userIsActive]);
+    
     const data = {
         columns: [
             {
                 label: 'ID',
                 field: 'ids',
                 sort: 'asc',
-                width: 150
-            },
+                width: 150,
+                attributes: {className: 'text-center'}
+                },
             {
                 label: 'Leave Type',
-                field: 'leaveType',
+                field: 'leave_type',
                 sort: 'asc',
                 width: 150
             },
             {
-                label: 'Leave Cause',
-                field: 'leaveCause',
+                label: 'From-To Date',
+                field: 'from_to_date',
                 sort: 'asc',
-                width: 270
+                width: 150
             },
             {
-                label: 'From',
-                field: 'fromDate',
-                width: 100,
+                label: 'No. Of Days',
+                field: 'no_of_days',
+                sort: 'asc',
+                width: 150,
                 attributes: {className: 'text-center'}
             },
             {
-                label: 'To',
-                field: 'toDate',
+                label: 'Reason',
+                field: 'reason',
+                sort: 'asc',
+                width: 150
+            },
+            {
+                label: 'Status',
+                field: 'status',
                 width: 100,
                 attributes: {className: 'text-center'}
             },
@@ -77,9 +146,9 @@ export default function Dashboard() {
                 width: 100,
                 attributes: {className: 'text-center'}
             }
-        ]
+        ],
+        rows: leaveApplicationsData
     };
-    
     return (
         <div className="container mt-5">
             <div className="row justify-content-center">
@@ -210,6 +279,7 @@ export default function Dashboard() {
                             </div>
                         </div>
                     </div>
+                    {isAdmin ?
                     <div className="card">
                         <div className="card-header">
                             <strong>Leave Requests</strong>
@@ -223,7 +293,7 @@ export default function Dashboard() {
                                 data = {data?data:null}
                             />
                         </div>
-                    </div>
+                    </div> : ''}
                 </div>
             </div>
         </div>

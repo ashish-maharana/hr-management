@@ -20,4 +20,9 @@ class LeaveApplication extends Model
         'reason',
         'date_of_approval'
     ];
+
+    public function leaveTypes()
+    {
+        return $this->belongsTo(leaveType::class, 'leave_type_id', 'id');
+    }
 }

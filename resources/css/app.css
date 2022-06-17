@@ -319,7 +319,23 @@ span.react-datepicker__navigation-icon.react-datepicker__navigation-icon--next {
     border: 1px solid #ca0000!important;
     cursor: pointer!important;
 }
+.custom-badge-success{
+    background-color: #44b700!important;
+    color: white!important;
+    padding: 2px 5px!important;
+    border: 1px solid #3ea800!important;
+    cursor: pointer!important;
+    font-size: small!important;
+}
 
+.custom-badge-danger{
+    background-color: #ff0000!important;
+    color: white!important;
+    padding: 2px 5px!important;
+    border: 1px solid #ca0000!important;
+    cursor: pointer!important;
+    font-size: small!important;
+}
 .add-icon-style{
     color:rgb(0, 170, 0);
     cursor: pointer;

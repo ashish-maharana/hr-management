@@ -7,9 +7,7 @@ import {
     PowerSettingsNewTwoTone as PowerOff, VisibilityOutlined as ViewRecord, EditOutlined as EditRecord, DeleteOutlineRounded as DeleteRecord, Add as AddLeaveTypesIcon
 } from '@mui/icons-material';
 import moment from 'moment';
-import Flatpickr from 'react-flatpickr';
 import {Breadcrumbs, Link, Typography} from '@material-ui/core'
-import DatePicker from "react-datepicker";
 import 'flatpickr/dist/flatpickr.css'
 import 'react-toastify/dist/ReactToastify.css';
 import "react-datepicker/dist/react-datepicker.css";
@@ -17,26 +15,8 @@ import "react-datepicker/dist/react-datepicker.css";
 export default function LeaveApplication() {
     let history = createBrowserHistory({forceRefresh:true});
     const userDataFetched = JSON.parse(localStorage.getItem('users'));
-    const [allLeaveTypes, setAllLeaveTypes] = useState([])
-    const [leaveApplication, setLeaveApplication] = useState({
-        day_type: true,
-        from_date: '',
-        to_date:'',
-    });
-    const {day_type, from_date, to_date} = leaveApplication;
-    const [leaveTypesData, setLeaveTypesData] = useState([]);
-    const userData = localStorage.getItem('users');
-    const skip_weekends = [1,2,3,4,5];
-    const onInputChange = (e) => {
-        if(e.target.name === 'day_type'){
-            e.target.value === 'true' ? 
-                setLeaveApplication({ ...leaveApplication, from_date:"", to_date:"", [e.target.name]: true })
-            : setLeaveApplication({ ...leaveApplication, from_date:"", to_date:"", [e.target.name]: false });
-        }else{
-            setLeaveApplication({ ...leaveApplication, [e.target.name]: e.target.value });
-        }
-    };
-
+    const [leaveApplicationsData, setleaveApplicationsData] = useState([]);
+    
     const logOut = () => {
         if(confirm('Do you want to log out?')) {
             localStorage.removeItem('users')
@@ -45,57 +25,20 @@ export default function LeaveApplication() {
         }
     }
 
-    const deleteLeaveType = (id) => {
-        if (confirm('Are you sure you want to delete this leave-type?')) {
-            ApiClient.post('/api/leave-types/delete-leave-type/' + id)
-            .then(response => {
-                if(response.data){
-                    toast.success('Record deleted successfully')
-                    return history.push("/leave-types")
-                }
-            });
-        }else{
-            return toast.error('Something went wrong try again')
+    const statusOfLeave = (status) => {
+        let statusArray = {leaveStatus: 'Rejected', statusClass: 'custom-badge-danger'};
+        if(status === 0){
+            statusArray.leaveStatus = 'Pending'
+            statusArray.statusClass = 'custom-actions'
+        }else if(status === 1){
+            statusArray.leaveStatus = 'Approved'
+            statusArray.statusClass = 'custom-badge-success'
         }
+        return statusArray
     }
 
-    const enableMonToFriDates = (date) => {
-        return skip_weekends.includes(date.getDay());
-    };
-
-    const startdateTrigger = (date) => {
-        setLeaveApplication({ ...leaveApplication, from_date: moment(date).format('YYYY-MM-DD') });
-    };
-
-    const enddateTrigger = (date) => {
-        setLeaveApplication({ ...leaveApplication, to_date: moment(date).format('YYYY-MM-DD') });
-    };
-    
-    useEffect(() => {
-        ApiClient.get('/api/leave-types/get-all-leave-types/')
-        .then(response => {
-            if(response.data){
-                setAllLeaveTypes(response.data)
-            }else{
-                toast.error('Error in fetching Roles')
-            }
-        });
-    }, []);
-
-    const getAllLeaveTypes = () => {
-        let fetchLeaveTypes = Object.entries(allLeaveTypes).map(([key, val]) => {
-            return <option key={key} value={val.name}>{val.name}</option>
-        });
-        return (
-            <select className="form-control" label="Role" name="default_role" onChange={e => onInputChange(e)}>
-                <option hidden> ---- Select Leave Type ---- </option>
-                {fetchLeaveTypes}
-            </select>
-        )
-    };
-
     useMemo(()=>{
-        ApiClient.get('/api/leave-types/')
+        ApiClient.get('/api/leave-applications/')
         .then(response => {
             let postsArray = [];
             JSON.parse(JSON.stringify(response.data)).map((item, index) => {
@@ -105,25 +48,37 @@ export default function LeaveApplication() {
                     </div>
                 );
                 item.leave_type = (
-                    <div className='d-flex align-items-center'>
-                        {item.name}
+                    <div className='text-center d-flex align-items-center'>
+                        {item.leave_types.name}
                     </div>
                 );
-                item.actions = (
+                item.from_to_date = (
+                    <div className='text-center d-flex align-items-center'>
+                        {item.from_date + " | " + item.to_date}
+                    </div>
+                );
+                item.no_of_days = (
+                    <div className='text-center'>
+                        {moment(item.to_date).diff(item.from_date, 'days')}
+                    </div>
+                );
+                item.status = (
+                    <div className='text-center'>
+                        <div className={`mx-1 rounded ${statusOfLeave(item.leave_status).statusClass}`}>{statusOfLeave(item.leave_status).leaveStatus}</div>
+                    </div>
+                );
+                item.action = (
                     <div className='text-center d-flex'>
                         <div className='mx-1 rounded custom-actions'>
                             <EditRecord className='action-icon-style' onClick={() => {history.push(`/leave-types/edit-leave-types/${item.id}`)}}/>
-                        </div>
-                        <div className='mx-1 rounded custom-actions'>
-                            <DeleteRecord className='action-icon-style' onClick={()=>{deleteLeaveType(item.id)}} /> 
                         </div>
                     </div>  
                 );
                 postsArray.push(item);
             });
-            setLeaveTypesData(postsArray)
+            setleaveApplicationsData(postsArray)
         });
-    },[userData]);
+    },[userDataFetched]);
     
     const data = {
         columns: [
@@ -141,25 +96,38 @@ export default function LeaveApplication() {
                 width: 150
             },
             {
-                label: 'Days Allowed',
-                field: 'no_of_days_allowed',
+                label: 'From-To Date',
+                field: 'from_to_date',
                 sort: 'asc',
                 width: 150
             },
             {
-                label: 'Description',
-                field: 'description',
+                label: 'No. Of Days',
+                field: 'no_of_days',
+                sort: 'asc',
+                width: 150,
+                attributes: {className: 'text-center'}
+            },
+            {
+                label: 'Reason',
+                field: 'reason',
                 sort: 'asc',
                 width: 150
             },
             {
-                label: 'Actions',
-                field: 'actions',
+                label: 'Status',
+                field: 'status',
+                width: 100,
+                attributes: {className: 'text-center'}
+            },
+            {
+                label: 'Action',
+                field: 'action',
                 width: 100,
                 attributes: {className: 'text-center'}
             }
         ],
-        rows: leaveTypesData
+        rows: leaveApplicationsData
     };
     return (
         <div className="container mt-5">
@@ -172,7 +140,7 @@ export default function LeaveApplication() {
                                 <Link underline="hover" color="inherit" href="/">
                                     Dashboard
                                 </Link>
-                                <Typography className='text-black'>Leave Types</Typography>
+                                <Typography className='text-black'>Leave Applications</Typography>
                             </Breadcrumbs>
                         </div>
                         <div className='col-md-6'>
@@ -180,134 +148,7 @@ export default function LeaveApplication() {
                             <span className='text-align-right role-style'><strong>(Role: {userDataFetched.roleName})&nbsp;&nbsp;</strong></span> 
                         </div>
                     </div>
-                    <div className='row'>
-                        <div className='col-md-7'>
-                            <div className="card mt-3">
-                                <div className="card-header">
-                                    <strong>Leave Application Form</strong>
-                                </div>
-                                <div className="card-body">
-                                    <div className="row">
-                                        <div className="form-group mt-2 col-sm-6">
-                                            {getAllLeaveTypes()}
-                                        </div>
-                                        <div className="form-group mt-2 col-sm-6">
-                                            <select className="form-control custom-options" label="day_type" name="day_type" onChange={e => onInputChange(e)}>
-                                                <option hidden> - Select No. Of Days Type - </option>
-                                                <option value={true} selected>One Day</option>
-                                                <option value={false}>More than One Day</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    {day_type ?
-                                    <div className="row">
-                                        <div className='form-group mt-3'>
-                                            <DatePicker
-                                                name="from_date"
-                                                className="form-control"
-                                                dateFormat="YYYY-MM-DD"
-                                                placeholderText='Select Date'
-                                                minDate={moment().toDate()}
-                                                showYearDropdown
-                                                scrollableYearDropdown
-                                                yearDropdownItemNumber={15}
-                                                autocomplete="off"
-                                                onChange={(e) => {
-                                                    startdateTrigger(e);
-                                                }}
-                                                value={from_date}
-                                            />
-                                        </div>
-                                    </div>
-                                    :
-                                    <div className="row">
-                                        <div className="form-group mt-3 col-sm-6">
-                                            <DatePicker
-                                                name="from_date"
-                                                className="form-control"
-                                                dateFormat="YYYY-MM-DD"
-                                                placeholderText='From Date'
-                                                minDate={moment().toDate()}
-                                                showYearDropdown
-                                                scrollableYearDropdown
-                                                yearDropdownItemNumber={15}
-                                                autocomplete="off"
-                                                onChange={(e) => {
-                                                    startdateTrigger(e);
-                                                }}
-                                                value={from_date}
-                                            />
-                                        </div>
-                                        <div className="form-group mt-3 col-sm-6">
-                                            <DatePicker
-                                                name="to_date"
-                                                className="form-control"
-                                                dateFormat="YYYY-MM-DD"
-                                                placeholderText='To Date'
-                                                minDate={moment().toDate()}
-                                                showYearDropdown
-                                                scrollableYearDropdown
-                                                yearDropdownItemNumber={15}
-                                                autocomplete="off"
-                                                onChange={(e) => {
-                                                    enddateTrigger(e);
-                                                }}
-                                                value={to_date}
-                                            />
-                                        </div>
-                                    </div>}
-                                    <div className='form-group mt-2'>
-                                        <label htmlFor="to_date">Attachment If any:</label>
-                                        <input type="file" className="form-control" label="Attachment" name="attachment" onChange={e => onInputChange(e)} required/>
-                                    </div>
-                                    <div className="form-group mt-3">
-                                        <textarea defaultValue={''} className='form-control' name='description' rows="3" placeholder="Provide a reason for the leave.." onChange={e => onInputChange(e)}></textarea>
-                                    </div>
-                                    <hr/>
-                                    <button type="submit" className="btn btn-primary" onClick={()=>{alert('do nothing')}}>Submit</button>  
-                                </div>
-                            </div>
-                        </div>
-                        <div className='col-md-5'>
-                            <div className="card mt-3">
-                                <div className="card-header">
-                                    <strong>Leave Calender - (View Only)</strong>
-                                </div>
-                                <div className='custom-padding-calender'>
-                                    {day_type ? 
-                                        <Flatpickr
-                                            value={from_date}
-                                            options={{ 
-                                                inline: true,
-                                                enable: [ 
-                                                    enableMonToFriDates ? enableMonToFriDates : ''
-                                                ], 
-                                                minDate: "today",
-                                                locale: {
-                                                    "firstDayOfWeek": 1 // start week on Monday
-                                                },
-                                            }}
-                                        />
-                                    : 
-                                        <Flatpickr
-                                            options={{ 
-                                                inline: true,
-                                                mode: "multiple",
-                                                dateFormat: "Y-m-d",
-                                                enable: [ 
-                                                    enableMonToFriDates ? enableMonToFriDates : ''
-                                                ],
-                                                minDate: from_date ? from_date : "today",
-                                                maxDate: to_date ? to_date : "",
-                                                locale: {
-                                                    "firstDayOfWeek": 1 // start week on Monday
-                                                },
-                                            }}
-                                        />}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    
                     <div className="card mt-3">
                         <div className="card-header">
                             <strong>Leave Requests</strong>

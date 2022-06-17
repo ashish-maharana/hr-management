@@ -126,4 +126,15 @@ class LeaveController extends BaseController
             return $this->sendError($e, [], 500);
         }
     }
+
+    public function getAllLeaveApplicationsOfEmp()
+    {
+        try{
+            $user = Auth::user();
+            $leaveApplication = LeaveApplication::with('leaveTypes')->get();
+            return response()->json($leaveApplication->toArray());
+        }catch (\Exception $e){
+            return $this->sendError($e, [], 500);
+        }
+    }
 }
