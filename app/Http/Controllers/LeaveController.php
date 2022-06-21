@@ -131,7 +131,7 @@ class LeaveController extends BaseController
     {
         try{
             $user = Auth::user();
-            $leaveApplication = LeaveApplication::with('leaveTypes')->get();
+            $leaveApplication = LeaveApplication::with('leaveTypes')->where('user_id', '=' , $user->id)->get();
             return response()->json($leaveApplication->toArray());
         }catch (\Exception $e){
             return $this->sendError($e, [], 500);

@@ -16,7 +16,7 @@ export default function LeaveApplication() {
     let history = createBrowserHistory({forceRefresh:true});
     const userDataFetched = JSON.parse(localStorage.getItem('users'));
     const [leaveApplicationsData, setleaveApplicationsData] = useState([]);
-    
+    const userData = localStorage.getItem('users');
     const logOut = () => {
         if(confirm('Do you want to log out?')) {
             localStorage.removeItem('users')
@@ -38,8 +38,9 @@ export default function LeaveApplication() {
     }
 
     useMemo(()=>{
-        ApiClient.get('/api/leave-applications/')
+        ApiClient.get('/api/leave-applications/get-all-leave-applications')
         .then(response => {
+            console.log("Response=>", response)
             let postsArray = [];
             JSON.parse(JSON.stringify(response.data)).map((item, index) => {
                 item.ids = (
@@ -78,7 +79,7 @@ export default function LeaveApplication() {
             });
             setleaveApplicationsData(postsArray)
         });
-    },[userDataFetched]);
+    },[userData]);
     
     const data = {
         columns: [
