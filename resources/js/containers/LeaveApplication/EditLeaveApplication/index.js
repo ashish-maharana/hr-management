@@ -45,20 +45,6 @@ export default function EditLea() {
         }
     }
 
-    const deleteLeaveType = (id) => {
-        if (confirm('Are you sure you want to delete this leave-type?')) {
-            ApiClient.post('/api/leave-types/delete-leave-type/' + id)
-            .then(response => {
-                if(response.data){
-                    toast.success('Record deleted successfully')
-                    return history.push("/leave-types")
-                }
-            });
-        }else{
-            return toast.error('Something went wrong try again')
-        }
-    }
-
     const enableMonToFriDates = (date) => {
         return skip_weekends.includes(date.getDay());
     };

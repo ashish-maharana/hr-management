@@ -71,7 +71,7 @@ export default function LeaveApplication() {
                 item.action = (
                     <div className='text-center d-flex'>
                         <div className='mx-1 rounded custom-actions'>
-                            <EditRecord className='action-icon-style' onClick={() => {history.push(`/leave-types/edit-leave-types/${item.id}`)}}/>
+                            <ViewRecord className='action-icon-style' onClick={() => {history.push(`/leave-types/edit-leave-types/${item.id}`)}}/>
                         </div>
                     </div>  
                 );

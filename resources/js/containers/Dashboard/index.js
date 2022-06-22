@@ -54,8 +54,21 @@ export default function Dashboard() {
         return statusArray
     }
 
+    const sendLeaveDataForAction = (leaveAppId, leaveStatus) => {
+        let actionData = {'leaveAppId':leaveAppId, 'leaveStatus':leaveStatus};
+        ApiClient.post('/api/leave-applications/action-on-leave-application/', actionData)
+        .then(response => {
+            if(response.status === 200){
+                toast.success("Leave Application Updated")
+                history.push('/')
+            }else{
+                toast.error('Something went wrong try again')
+            }
+        });
+    }
+    
     useMemo(()=>{
-        ApiClient.get('/api/leave-applications/get-all-leave-applications')
+        ApiClient.get('/api/leave-applications/')
         .then(response => {
             let postsArray = [];
             JSON.parse(JSON.stringify(response.data)).map((item, index) => {
@@ -87,10 +100,10 @@ export default function Dashboard() {
                 item.actions = (
                     <div className='text-center d-flex'>
                         <div className='mx-1 rounded custom-actions'>
-                            <ApproveLeave className='action-icon-style' onClick={() => {history.push(`/leave-types/edit-leave-types/${item.id}`)}}/>
+                            <ApproveLeave className='action-icon-style' onClick={() => sendLeaveDataForAction(item.id, 1)}/>
                         </div>
                         <div className='mx-1 rounded custom-actions'>
-                            <RejectLeave className='action-icon-style' onClick={() => {history.push(`/leave-types/edit-leave-types/${item.id}`)}}/>
+                            <RejectLeave className='action-icon-style' onClick={() => sendLeaveDataForAction(item.id, 2)}/>
                         </div>
                     </div>  
                 );

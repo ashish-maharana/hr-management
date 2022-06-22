@@ -38,8 +38,8 @@ class LeaveController extends BaseController
             if($isLeaveTypeExist){
                 return $this->sendResponse($isLeaveTypeExist, 'Leave Type Exist', 201);
             }
-            $input = $request->all();
-            $leaveType = LeaveType::create($input);
+            $data = $request->all();
+            $leaveType = LeaveType::create($data);
             return $this->sendResponse($leaveType, 'Leave Type added successfully.', 200);
         }catch (\Exception $e){
             return $this->sendError($e, [], 500);
@@ -119,9 +119,31 @@ class LeaveController extends BaseController
             $request['user_id'] = $user->id;
             $request['leave_type_id'] = intval($request->leave_type_id);
             $request['date_of_application'] =  Carbon::today()->startOfDay()->format('Y-m-d');
-            $input = $request->all();
-            $leaveType = LeaveApplication::create($input);
+            $data = $request->all();
+            $leaveType = LeaveApplication::create($data);
             return $this->sendResponse($leaveType, 'Leave Type added successfully.', 200);
+        }catch (\Exception $e){
+            return $this->sendError($e, [], 500);
+        }
+    }
+
+    public function actionOnLeaveApplication(Request $request)
+    {
+        try{
+            $user = Auth::user();
+            $req['processed_by_id'] = $user->id;
+            $req['leave_status'] = intval($request->leaveStatus);
+            if(intval($request->leaveStatus) === 1){
+                $req['date_of_approval'] =  Carbon::today()->startOfDay()->format('Y-m-d');
+            }else{
+                $req['date_of_approval'] = null;
+            }
+            $leaveAction = LeaveApplication::where('id',intval($request->leaveAppId))->update(array(
+                'processed_by_id'=>$req['processed_by_id'], 
+                'leave_status'=>$req['leave_status'], 
+                'date_of_approval'=>$req['date_of_approval']
+            ));
+            return $this->sendResponse($leaveAction, 'Leave Application Updated Successfully.', 200);
         }catch (\Exception $e){
             return $this->sendError($e, [], 500);
         }
@@ -132,6 +154,16 @@ class LeaveController extends BaseController
         try{
             $user = Auth::user();
             $leaveApplication = LeaveApplication::with('leaveTypes')->where('user_id', '=' , $user->id)->get();
+            return response()->json($leaveApplication->toArray());
+        }catch (\Exception $e){
+            return $this->sendError($e, [], 500);
+        }
+    }
+
+    public function getAllLeaveApplications()
+    {
+        try{
+            $leaveApplication = LeaveApplication::with('leaveTypes')->get();
             return response()->json($leaveApplication->toArray());
         }catch (\Exception $e){
             return $this->sendError($e, [], 500);
