@@ -142,11 +142,9 @@ class LeaveController extends BaseController
             $req['c_l'] = $applicantUser->c_l;
             $req['s_l'] = $applicantUser->s_l;
             $req['balanced_leaves'] = $applicantUser->balanced_leaves;
-
             if(!$request->sickDoc && intval($request->leaveStatus) === 1){
                 $req['c_l'] = $applicantUser->c_l - intval($request->NoOfDays);
             }
-
             if($request->sickDoc && intval($request->leaveStatus) === 1){
                 $req['leave_status'] = intval($request->leaveStatus);
                 $req['c_l'] = $applicantUser->c_l + intval($request->NoOfDays);
@@ -157,7 +155,6 @@ class LeaveController extends BaseController
                     $req['balanced_leaves'] = $applicantUser->balanced_leaves - (intval($request->NoOfDays) - $applicantUser->s_l);
                 }
             }
-            
             $leaveAction = LeaveApplication::where('id',intval($request->leaveAppId))->update(array(
                 'processed_by_id'=>$req['processed_by_id'], 
                 'leave_status'=>$req['leave_status'], 
