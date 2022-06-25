@@ -4,13 +4,15 @@ import ApiClient from "../../config";
 import {toast} from "react-toastify";
 import { MDBCard, MDBCardBody, MDBCol, MDBContainer, MDBDataTable, MDBRow } from 'mdbreact';
 import {
-    PowerSettingsNewTwoTone as PowerOff, VisibilityOutlined as ViewRecord, EditOutlined as EditRecord, DeleteOutlineRounded as DeleteRecord, Add as AddLeaveTypesIcon, CalendarMonth as TotalLeaves, Sick as SickLeave, Event as CasualLeaves
+    PowerSettingsNewTwoTone as PowerOff, VisibilityOutlined as ViewRecord, EditOutlined as EditRecord, DeleteOutlineRounded as DeleteRecord, Add as AddLeaveTypesIcon, CalendarMonth as TotalLeaves, Sick as SickLeave, Event as CasualLeaves, Close as CloseModal
 } from '@mui/icons-material';
 import moment from 'moment';
 import {Breadcrumbs, Link, Typography} from '@material-ui/core'
 import 'flatpickr/dist/flatpickr.css'
 import 'react-toastify/dist/ReactToastify.css';
 import "react-datepicker/dist/react-datepicker.css";
+import Dialog from '@mui/material/Dialog';
+import DialogContent from '@mui/material/DialogContent';
 
 export default function LeaveApplication() {
     let history = createBrowserHistory({forceRefresh:true});
@@ -23,30 +25,17 @@ export default function LeaveApplication() {
         s_l: ""
     });
     const {id,balanced_leaves,c_l,s_l} = userLeaveData;
-    const [sickData, setSickData] = useState({
-        sick_id: "",
-        attachment: ""
-    });
     const [leaveApplicationsData, setleaveApplicationsData] = useState([]);
     const userData = localStorage.getItem('users');
-    const sendSickDocData = () =>
-    {
-        console.log("Attachment=>", sickData.sick_id);
-
-        // let formData = new FormData()
-        // formData.append('id', sick_id)
-        // formData.append('attachment', attachment)
-        // ApiClient.post('/api/leave-applications/apply-for-sick-doc-approval/',formData)
-        // .then(response => {
-        //     if(response.status === 200){
-        //         toast.success("Document Uploaded Successfully Wait for Response")
-        //         // history.push("/leave-applications")
-        //     }else{
-        //         toast.error('Something went wrong try again')
-        //     }
-        // });
-    }
-
+    const [selectedDoc, setSelectedDoc] = useState('');
+    const [open, setOpen] = useState(false);
+    const handleAlertMessage = (data) => {
+        setSelectedDoc(data);
+        setOpen(true);
+    };
+    const handleClose = () => {
+        setOpen(false);
+    };
     const logOut = () => {
         if(confirm('Do you want to log out?')) {
             localStorage.removeItem('users')
@@ -105,11 +94,14 @@ export default function LeaveApplication() {
                     </div>
                 );
                 item.upload_sick_doc = (
+                    item.attachment ? 
                     <div className='text-center'>
-                        <button name='btnSickDoc' className='btn btn-secondary side-link' onClick={handleClick}>Upload Doc</button>
-                        <input type='file' className="d-none" id="sick_doc" name='sick_doc' ref={hiddenFileInput} onChange={(e) => handleSicDocUpload(e, item.id)}/>
-                        <button type="submit" className="btn btn-primary side-link ms-2" onClick={sendSickDocData}>Submit</button>  
-                    </div>
+                        <button name='btnSickDoc' onClick={()=> handleAlertMessage(item.attachment)} className='custom-badge-upload'>View Document</button>
+                    </div> : 
+                    <div className='text-center'>
+                        <button name='btnSickDoc' className='custom-badge-upload' onClick={handleClick}>Upload Doc</button>
+                        <input type='file' className="d-none" id="sick_doc" name='sick_doc' ref={hiddenFileInput} onChange={(e) => handleSicDocUpload(e, item.id)}/> 
+                    </div> 
                 );
                 item.status = (
                     <div className='text-center'>
@@ -170,10 +162,20 @@ export default function LeaveApplication() {
     }
 
     const handleSicDocUpload = (event, id) => {
-        setSickData({...sickData, sick_id: id,attachment: event.target.files[0]})
+        let formData = new FormData()
+        formData.append('id', id)
+        formData.append('attachment', event.target.files[0])
+        ApiClient.post('/api/leave-applications/apply-for-sick-doc-approval/',formData)
+        .then(response => {
+            if(response.status === 200){
+                toast.success("Document Uploaded Successfully Wait for Response")
+                history.push("/leave-applications")
+            }else{
+                toast.error('Something went wrong try again')
+            }
+        });
     };
-
-    console.log("Sick Data=>\n", sickData);
+    
     return (
         <div className="container mt-5">
             <div className="row justify-content-center">
@@ -239,6 +241,15 @@ export default function LeaveApplication() {
                             />
                         </div>
                     </div>
+                    <Dialog key={selectedDoc} open={open} onClose={handleClose}>
+                        <div className="card-header">
+                            <strong>Medical Document</strong>
+                            <CloseModal className='text-align-right close-icon-style' onClick={handleClose}/>    
+                        </div>
+                        <DialogContent className='dialog-overflow'>
+                            <img src={`images/sickDocs/${selectedDoc}`} className="view-sick-doc"/>
+                        </DialogContent>
+                    </Dialog>
                 </div>
             </div>
         </div>

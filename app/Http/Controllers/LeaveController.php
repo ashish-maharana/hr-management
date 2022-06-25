@@ -139,11 +139,25 @@ class LeaveController extends BaseController
             $req['processed_by_id'] = $user->id;
             $req['leave_status'] = intval($request->leaveStatus);
             $req['date_of_approval'] =  Carbon::today()->startOfDay()->format('Y-m-d');
-            
-            if(intval($request->leaveStatus) === 1){
+            $req['c_l'] = $applicantUser->c_l;
+            $req['s_l'] = $applicantUser->s_l;
+            $req['balanced_leaves'] = $applicantUser->balanced_leaves;
+
+            if(!$request->sickDoc && intval($request->leaveStatus) === 1){
                 $req['c_l'] = $applicantUser->c_l - intval($request->NoOfDays);
             }
 
+            if($request->sickDoc && intval($request->leaveStatus) === 1){
+                $req['leave_status'] = intval($request->leaveStatus);
+                $req['c_l'] = $applicantUser->c_l + intval($request->NoOfDays);
+                if(intval($request->NoOfDays) <= $applicantUser->s_l){
+                    $req['s_l'] = $applicantUser->s_l - intval($request->NoOfDays);
+                }else{
+                    $req['s_l'] = 0;
+                    $req['balanced_leaves'] = $applicantUser->balanced_leaves - (intval($request->NoOfDays) - $applicantUser->s_l);
+                }
+            }
+            
             $leaveAction = LeaveApplication::where('id',intval($request->leaveAppId))->update(array(
                 'processed_by_id'=>$req['processed_by_id'], 
                 'leave_status'=>$req['leave_status'], 
@@ -151,6 +165,8 @@ class LeaveController extends BaseController
             ));
             $userDataUpdate = User::where('id', $request->ApplicantId)->update(array(
                 'c_l'=>$req['c_l'],
+                's_l'=>$req['s_l'],
+                'balanced_leaves'=>$req['balanced_leaves'],
             ));
             return $this->sendResponse($leaveAction, 'Leave Application Updated Successfully.', 200);
         }catch (\Exception $e){
@@ -181,6 +197,27 @@ class LeaveController extends BaseController
 
     public function applyForSickDocApproval(Request $request)
     {
-        dd($request);   
+        try {
+            $sickDocument = null;
+            $checkImgExist = LeaveApplication::where('attachment', '=', $request->attachment)->first();
+            if(!empty($checkImgExist)){
+                $sickDocument = $request->attachment;
+            }elseif($request->attachment === null){
+                $sickDocument = null;
+            }else{
+                $file = $request->file('attachment');
+                $filename = str_replace(' ', '_', $file->getClientOriginalName());
+                $sickDocument = date('His').'-'.$filename;
+                $file->move('images/sickDocs', $sickDocument);
+            }
+
+            $sickDocUpload = LeaveApplication::updateOrCreate(['id' => $request->id],[
+                'attachment' => $sickDocument??null,
+                'leave_status' => 0
+            ]);
+            return $this->sendResponse($sickDocUpload, 'Sick Doc Uploaded successfully.', 200);
+        } catch (\Exception $e) {
+            return $this->sendError($e, [], 500);
+        }
     }
 }

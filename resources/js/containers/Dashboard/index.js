@@ -8,6 +8,8 @@ import { MDBDataTable } from 'mdbreact';
 import { Avatar, Link } from '@mui/material';
 import moment from 'moment';
 import { StyledBadge } from '../../components/custom-components';
+import Dialog from '@mui/material/Dialog';
+import DialogContent from '@mui/material/DialogContent';
 
 export default function Dashboard() {
     let history = createBrowserHistory({forceRefresh:true});
@@ -21,6 +23,16 @@ export default function Dashboard() {
         image_path: "",
     });
     const {first_name, last_name, image_path} = userData;
+    const [selectedDoc, setSelectedDoc] = useState('');
+    const [open, setOpen] = useState(false);
+    const handleAlertMessage = (data) => {
+        console.log(data)
+        setSelectedDoc(data);
+        setOpen(true);
+    };
+    const handleClose = () => {
+        setOpen(false);
+    };
     const logOut = () => {
         if(confirm('Do you want to log out?')) {
             localStorage.removeItem('users')
@@ -54,8 +66,8 @@ export default function Dashboard() {
         return statusArray
     }
 
-    const sendLeaveDataForAction = (leaveAppId, ApplicantId, leaveStatus, NoOfDays) => {
-        let actionData = {'leaveAppId':leaveAppId, 'ApplicantId': ApplicantId, 'leaveStatus':leaveStatus, 'NoOfDays':NoOfDays};
+    const sendLeaveDataForAction = (leaveAppId, ApplicantId, leaveStatus, sickDoc, NoOfDays) => {
+        let actionData = {'leaveAppId':leaveAppId, 'ApplicantId': ApplicantId, 'leaveStatus':leaveStatus, 'sickDoc':sickDoc, 'NoOfDays':NoOfDays};
         ApiClient.post('/api/leave-applications/action-on-leave-application/', actionData)
         .then(response => {
             if(response.status === 200){
@@ -87,9 +99,13 @@ export default function Dashboard() {
                         {`"`+item.from_date+`"` + " To " + `"`+item.to_date+`"` + " = (" + (moment(item.to_date).diff(item.from_date, 'days')+1) + " Days)"}
                     </div>
                 );
-                item.leave_details = (
+                item.sick_doc = (
+                    item.attachment ? 
+                    <div className='text-center'>
+                        <button name='btnSickDoc' onClick={()=> handleAlertMessage(item.attachment)} className='custom-badge-upload'>View Document</button>
+                    </div> : 
                     <div className='mx-1 rounded custom-actions'>
-                        <ViewRecord className='action-icon-style'/>
+                        N / A
                     </div>
                 );
                 item.status = (
@@ -100,15 +116,14 @@ export default function Dashboard() {
                  
                 item.actions = (
                     <div className="d-flex text-center">
-                        
                     {item.leave_status === 0 ?
                         <>
                             <div className='mx-1 rounded custom-actions'>
-                                <ApproveLeave className='action-icon-style' onClick={() => sendLeaveDataForAction(item.id, item.user_id, 1, moment(item.to_date).diff(item.from_date, 'days')+1) }/> 
+                                <ApproveLeave className='action-icon-style' onClick={() => sendLeaveDataForAction(item.id, item.user_id, 1, item.attachment,moment(item.to_date).diff(item.from_date, 'days')+1) }/> 
                             </div>
                             
                             <div className='mx-1 rounded custom-actions'>
-                                <RejectLeave className='action-icon-style' onClick={() => sendLeaveDataForAction(item.id, item.user_id, 2, moment(item.to_date).diff(item.from_date, 'days')+1)}/>
+                                <RejectLeave className='action-icon-style' onClick={() => sendLeaveDataForAction(item.id, item.user_id, 2, item.attachment,moment(item.to_date).diff(item.from_date, 'days')+1)}/>
                             </div>
                         </>
                         :
@@ -145,8 +160,8 @@ export default function Dashboard() {
                 width: 150
             },
             {
-                label: 'View Leave Details',
-                field: 'leave_details',
+                label: 'View Sick Doc',
+                field: 'sick_doc',
                 sort: 'asc',
                 width: 150,
                 attributes: {className: 'text-center'}
@@ -216,7 +231,6 @@ export default function Dashboard() {
                                         <span className='rounded custom-badge-punch-in text-align-right' onClick={()=>{history.push('/')}}>Punch In<PunchIn className='svg-icon-punch-in'/></span> 
                                         <span className='mx-2 rounded custom-auths text-align-right' onClick={()=>{history.push('/leave-applications')}}>Leave Applications<TotalLeaves className='svg-icon-lighblue'/></span>
                                         <span className='mx-2 rounded custom-auths text-align-right' onClick={()=>{history.push('/apply-leave')}}>Apply Leave<TotalLeaves className='svg-icon-lighblue'/></span>
-                                        
                                     </div> 
                                 }
                             </div>
@@ -313,6 +327,17 @@ export default function Dashboard() {
                             />
                         </div>
                     </div> : ''}
+
+                    {isAdmin ?
+                    <Dialog key={selectedDoc} open={open} onClose={handleClose}>
+                        <div className="card-header">
+                            <strong>Medical Document</strong>
+                            <RejectLeave className='text-align-right close-icon-style' onClick={handleClose}/>    
+                        </div>
+                        <DialogContent className='dialog-overflow'>
+                            <img src={`images/sickDocs/${selectedDoc}`} className="view-sick-doc"/>
+                        </DialogContent>
+                    </Dialog> : ''}
                 </div>
             </div>
         </div>

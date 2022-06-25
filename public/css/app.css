@@ -11579,7 +11579,7 @@ span.react-datepicker__navigation-icon.react-datepicker__navigation-icon--next {
 
 .custom-actions{
     background-color: #ffffff!important;
-    padding: 2px 5px!important;
+    padding: 0px 5px!important;
     border: 1px solid #ced4da!important;
     font-size: small;
     text-align: center;
@@ -11610,7 +11610,7 @@ span.react-datepicker__navigation-icon.react-datepicker__navigation-icon--next {
 .custom-badge-success{
     background-color: #44b700!important;
     color: white!important;
-    padding: 2px 5px!important;
+    padding: 0px 5px!important;
     border: 1px solid #3ea800!important;
     cursor: pointer!important;
     font-size: small!important;
@@ -11619,11 +11619,23 @@ span.react-datepicker__navigation-icon.react-datepicker__navigation-icon--next {
 .custom-badge-danger{
     background-color: #ff0000!important;
     color: white!important;
-    padding: 2px 5px!important;
+    padding: 0px 5px!important;
     border: 1px solid #ca0000!important;
     cursor: pointer!important;
     font-size: small!important;
 }
+
+.custom-badge-upload{
+    width: 100%;
+    border-radius: 0.25rem !important;
+    background-color: #000000!important;
+    color: white!important;
+    padding: 0px 5px!important;
+    border: 1px solid #000000!important;
+    cursor: pointer!important;
+    font-size: small!important;
+}
+
 .add-icon-style{
     color:rgb(0, 170, 0);
     cursor: pointer;
@@ -11753,4 +11765,14 @@ td:first-child {
 }
 .side-link{
     padding: 0px 5px!important;
+}
+.view-sick-doc{
+    height: auto;
+    width: 100%;
+}
+.dialog-overflow{
+    overflow: hidden;
+}
+.MuiDialogContent-root {
+    padding: 0rem!important;
 }

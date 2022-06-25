@@ -16,7 +16,6 @@ import TableContainer from '@mui/material/TableContainer';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { PowerSettingsNewTwoTone as PowerOff, VisibilityOutlined as ViewRecord, EditOutlined as EditRecord, DeleteOutlineRounded as DeleteRecord, Add as AddEmployeesIcon, Close as CloseModal } from '@mui/icons-material';
-import { auto } from '@popperjs/core';
 
 export default function Employees() {
     let history = createBrowserHistory({forceRefresh:true});
