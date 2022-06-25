@@ -14,10 +14,9 @@ export default function AddLeaveTypes() {
     const userDataFetched = JSON.parse(localStorage.getItem('users'));
     const [leaveType, setLeaveType] = useState({
         name: "",
-        description: "",
-        no_of_days_allowed: "",
+        description: ""
     });
-    const {name, description, no_of_days_allowed} = leaveType;
+    const {name, description} = leaveType;
     
     const onInputChange = (e) => {
         setLeaveType({ ...leaveType, [e.target.name]: e.target.value });
@@ -37,10 +36,10 @@ export default function AddLeaveTypes() {
                 toast.error("Leave Type Already Exist")
             }else if(response.status === 200){
                 toast.success("Leave Type Added Successfully")
-                setLeaveType({name:"",description:"",no_of_days_allowed:""})
+                setLeaveType({name:"",description:""})
             }else{
                 toast.error('Something went wrong try again')
-                setLeaveType({name:"",description:"",no_of_days_allowed:""})
+                setLeaveType({name:"",description:""})
             }
         });
         history.push("/leave-types")
@@ -83,9 +82,6 @@ export default function AddLeaveTypes() {
                         <div className="card-body">
                             <div className="form-group">
                                 <input type="text" className="form-control" label="Leave Type" name="name" value={name} onChange={e => onInputChange(e)} placeholder="Enter Leave Type" required/>
-                            </div>
-                            <div className="form-group mt-2">
-                                <input type="number" className="form-control" label="No Of Days Allowed" name="no_of_days_allowed" value={no_of_days_allowed} onChange={e => onInputChange(e)} placeholder="Enter No. of days allowed" required/>
                             </div>
                             <div className="form-group mt-2">
                                 <textarea defaultValue={description} className='form-control' name='description' rows="3" placeholder="Write Description if any.." onChange={e => onInputChange(e)}></textarea>

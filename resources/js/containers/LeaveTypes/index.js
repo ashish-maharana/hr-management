@@ -53,11 +53,6 @@ export default function LeaveTypes() {
                         {item.name}
                     </div>
                 );
-                item.no_of_days_allowed = (
-                    <div className='d-flex align-items-center'>
-                        {item.no_of_days_allowed ? item.no_of_days_allowed : "Based on discuss"}
-                    </div>
-                )
                 item.actions = (
                     <div className='text-center d-flex'>
                         <div className='mx-1 rounded custom-actions'>
@@ -86,12 +81,6 @@ export default function LeaveTypes() {
             {
                 label: 'Leave Type',
                 field: 'leave_type',
-                sort: 'asc',
-                width: 150
-            },
-            {
-                label: 'Days Allowed',
-                field: 'no_of_days_allowed',
                 sort: 'asc',
                 width: 150
             },

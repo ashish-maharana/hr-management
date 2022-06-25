@@ -62,6 +62,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', [LeaveController::class, 'getAllLeaveApplications']);
         Route::get('/get-all-leave-applications', [LeaveController::class, 'getAllLeaveApplicationsOfEmp']);
         Route::post('/apply-leave-application', [LeaveController::class, 'applyLeaveApplication']);
+        Route::post('/apply-for-sick-doc-approval', [LeaveController::class, 'applyForSickDocApproval']);
         Route::post('/action-on-leave-application', [LeaveController::class, 'actionOnLeaveApplication']);
         Route::post('/edit-leave-application', [LeaveController::class, 'editLeaveApplication']);
         Route::get('/get-leave-applicaition/{id}', [LeaveController::class, 'getLeaveApplication']);

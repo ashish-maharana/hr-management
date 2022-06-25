@@ -16,10 +16,9 @@ export default function EditLeaveTypes({match}) {
     const [leaveType, setLeaveType] = useState({
         id:"",
         name: "",
-        description: "",
-        no_of_days_allowed: ""
+        description: ""
     });
-    const {name, description, no_of_days_allowed} = leaveType;
+    const {name, description} = leaveType;
     
     const onInputChange = (e) => {
         setLeaveType({ ...leaveType, [e.target.name]: e.target.value });
@@ -31,8 +30,6 @@ export default function EditLeaveTypes({match}) {
             return toast.error('Leave Type Field is empty')
         }else if(leaveType.description === ''){
             return toast.error('Description Field is empty')
-        }else if(leaveType.no_of_days_allowed === ''){
-            return toast.error('No. of days allowed Field is empty')
         }
 
         ApiClient.post('/api/leave-types/edit-leave-type/',leaveType)
@@ -60,7 +57,7 @@ export default function EditLeaveTypes({match}) {
             .then(response => {
                 if(response.data){
                     // Data set to useState - (leave-type)
-                    setLeaveType({name:response.data.name, description:response.data.description, no_of_days_allowed:response.data.no_of_days_allowed, id: response.data.id}) 
+                    setLeaveType({name:response.data.name, description:response.data.description, id: response.data.id}) 
                 }else{
                     toast.error('Something went wrong try again')
                 }
@@ -97,9 +94,6 @@ export default function EditLeaveTypes({match}) {
                         <div className="card-body">
                             <div className="form-group">
                                 <input type="text" className="form-control" label="Leave Type" name="name" value={name} onChange={e => onInputChange(e)} placeholder="Enter Leave Type" required/>
-                            </div>
-                            <div className="form-group mt-2">
-                                <input type="number" className="form-control" label="No Of Days Allowed" name="no_of_days_allowed" value={no_of_days_allowed} onChange={e => onInputChange(e)} placeholder="Enter No. of days allowed" required/>
                             </div>
                             <div className="form-group mt-2">
                                 <textarea defaultValue={description} className='form-control' name='description' rows="3" placeholder="Write Description if any.." onChange={e => onInputChange(e)}></textarea>

@@ -11728,6 +11728,7 @@ td:first-child {
 
 .card-title{
     margin-bottom: 1rem!important;
+    font-size: small!important;
 }
 
 .page-item.active .page-link {
@@ -11745,10 +11746,11 @@ td:first-child {
 
 .btn-primary {
     background-color: #6495ed!important;
-    border-color: #ced4da!important;
+    border-color: #6495ed!important;
 }
-
-.custom-options{
-    -moz-text-align-last: center!important;
-         text-align-last: center!important;
+.numInputWrapper {
+    margin-right: 10px!important;
+}
+.side-link{
+    padding: 0px 5px!important;
 }

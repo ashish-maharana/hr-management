@@ -3,7 +3,7 @@ import { createBrowserHistory } from 'history';
 import {toast} from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import ApiClient from "../../config";
-import { ArrowRight as PunchIn, ArrowLeft as PunchOut, EventNote as LeaveRequests, EventAvailable as LeaveApproved, EventBusy as LeaveDeclined, TouchApp as PresentToday, AccountBox as EditProfile, PowerSettingsNewTwoTone as PowerOff, GroupRounded as TotalEmployees, CalendarMonth as TotalLeaves, Sick as SickLeave, Event as CasualLeaves, Settings as ManageRoles, AdminPanelSettings as ManagePermissions, Done as ApproveLeave, Close as RejectLeave} from '@mui/icons-material';
+import { ArrowRight as PunchIn, ArrowLeft as PunchOut, VisibilityOutlined as ViewRecord, EventNote as LeaveRequests, EventAvailable as LeaveApproved, EventBusy as LeaveDeclined, TouchApp as PresentToday, AccountBox as EditProfile, PowerSettingsNewTwoTone as PowerOff, GroupRounded as TotalEmployees, CalendarMonth as TotalLeaves, Sick as SickLeave, Event as CasualLeaves, Settings as ManageRoles, AdminPanelSettings as ManagePermissions, Done as ApproveLeave, Close as RejectLeave} from '@mui/icons-material';
 import { MDBDataTable } from 'mdbreact';
 import { Avatar, Link } from '@mui/material';
 import moment from 'moment';
@@ -54,8 +54,8 @@ export default function Dashboard() {
         return statusArray
     }
 
-    const sendLeaveDataForAction = (leaveAppId, leaveStatus) => {
-        let actionData = {'leaveAppId':leaveAppId, 'leaveStatus':leaveStatus};
+    const sendLeaveDataForAction = (leaveAppId, ApplicantId, leaveStatus, NoOfDays) => {
+        let actionData = {'leaveAppId':leaveAppId, 'ApplicantId': ApplicantId, 'leaveStatus':leaveStatus, 'NoOfDays':NoOfDays};
         ApiClient.post('/api/leave-applications/action-on-leave-application/', actionData)
         .then(response => {
             if(response.status === 200){
@@ -84,12 +84,12 @@ export default function Dashboard() {
                 );
                 item.from_to_date = (
                     <div className='text-center d-flex align-items-center'>
-                        {item.from_date + " | " + item.to_date}
+                        {`"`+item.from_date+`"` + " To " + `"`+item.to_date+`"` + " = (" + (moment(item.to_date).diff(item.from_date, 'days')+1) + " Days)"}
                     </div>
                 );
-                item.no_of_days = (
-                    <div className='text-center'>
-                        {moment(item.to_date).diff(item.from_date, 'days')}
+                item.leave_details = (
+                    <div className='mx-1 rounded custom-actions'>
+                        <ViewRecord className='action-icon-style'/>
                     </div>
                 );
                 item.status = (
@@ -97,14 +97,24 @@ export default function Dashboard() {
                         <div className={`mx-1 rounded ${statusOfLeave(item.leave_status).statusClass}`}>{statusOfLeave(item.leave_status).leaveStatus}</div>
                     </div>
                 );
+                 
                 item.actions = (
-                    <div className='text-center d-flex'>
+                    <div className="d-flex text-center">
+                        
+                    {item.leave_status === 0 ?
+                        <>
+                            <div className='mx-1 rounded custom-actions'>
+                                <ApproveLeave className='action-icon-style' onClick={() => sendLeaveDataForAction(item.id, item.user_id, 1, moment(item.to_date).diff(item.from_date, 'days')+1) }/> 
+                            </div>
+                            
+                            <div className='mx-1 rounded custom-actions'>
+                                <RejectLeave className='action-icon-style' onClick={() => sendLeaveDataForAction(item.id, item.user_id, 2, moment(item.to_date).diff(item.from_date, 'days')+1)}/>
+                            </div>
+                        </>
+                        :
                         <div className='mx-1 rounded custom-actions'>
-                            <ApproveLeave className='action-icon-style' onClick={() => sendLeaveDataForAction(item.id, 1)}/>
-                        </div>
-                        <div className='mx-1 rounded custom-actions'>
-                            <RejectLeave className='action-icon-style' onClick={() => sendLeaveDataForAction(item.id, 2)}/>
-                        </div>
+                            N / A
+                        </div>}
                     </div>  
                 );
                 postsArray.push(item);
@@ -121,7 +131,7 @@ export default function Dashboard() {
                 sort: 'asc',
                 width: 150,
                 attributes: {className: 'text-center'}
-                },
+            },
             {
                 label: 'Leave Type',
                 field: 'leave_type',
@@ -135,17 +145,11 @@ export default function Dashboard() {
                 width: 150
             },
             {
-                label: 'No. Of Days',
-                field: 'no_of_days',
+                label: 'View Leave Details',
+                field: 'leave_details',
                 sort: 'asc',
                 width: 150,
                 attributes: {className: 'text-center'}
-            },
-            {
-                label: 'Reason',
-                field: 'reason',
-                sort: 'asc',
-                width: 150
             },
             {
                 label: 'Status',
@@ -219,52 +223,54 @@ export default function Dashboard() {
                         </div>
                     </div>
                     <div className="row row-cols-1 row-cols-md-4 mt-3">
-                        <div className="col mb-3" onClick={()=>{isAdmin ? history.push("/employees") : ''}} style={{cursor: "pointer"}}>
+                        <div className={`${isAdmin? 'col-md-3 mb-3' : 'col-md-4 mb-3'}`} onClick={()=>{isAdmin ? history.push("/employees") : ''}} style={{cursor: "pointer"}}>
                             <div className="card violet">
                             <div className="card-body">
-                                <h6 className="card-title"><strong>{isAdmin ? 'Total Employees' : 'Total Leaves for the year'}</strong></h6>
+                                <h6 className="card-title"><strong>{isAdmin ? 'Total Employees' : 'Leaves You Have so far'}</strong></h6>
                                 {isAdmin ? <TotalEmployees className='card-icon-style svg-icon-violet' /> : <TotalLeaves className='card-icon-style svg-icon-violet' />}
                                 <span className='text-align-right card-text-style circle-span-violet'>20</span>
                             </div>
                             </div>
                         </div>
-                        <div className="col mb-3" style={{cursor: "pointer"}}>
+                        <div className={`${isAdmin? 'col-md-3 mb-3' : 'col-md-4 mb-3'}`} style={{cursor: "pointer"}}>
                             <div className="card red">
                             <div className="card-body">
-                                <h6 className="card-title"><strong>Casual Leaves Taken</strong></h6>
+                                <h6 className="card-title"><strong>Casual Leaves you have</strong></h6>
                                 <CasualLeaves className='card-icon-style svg-icon-red' /> 
                                 <span className='text-align-right card-text-style circle-span-red'>10</span>
                             </div>
                             </div>
                         </div>
-                        <div className="col mb-3" style={{cursor: "pointer"}}>
+                        <div className={`${isAdmin? 'col-md-3 mb-3' : 'col-md-4 mb-3'}`} style={{cursor: "pointer"}}>
                             <div className="card teal">
                             <div className="card-body">
-                                <h6 className="card-title"><strong>Sick Leaves Taken</strong></h6>
+                                <h6 className="card-title"><strong>Sick Leaves you have</strong></h6>
                                 <SickLeave className='card-icon-style svg-icon-teal' /> 
                                 <span className='text-align-right card-text-style circle-span-teal'>3</span>
                             </div>
                             </div>
                         </div>
-                        <div className="col mb-3" style={{cursor: "pointer"}}>
+                        {isAdmin ?
+                        <div className={`${isAdmin? 'col-md-3 mb-3' : 'col-md-4 mb-3'}`} style={{cursor: "pointer"}}>
                             <div className="card blue">
                             <div className="card-body">
-                                <h6 className="card-title"><strong>{isAdmin ? 'Total Other Leaves' : 'Other Leaves Taken'}</strong></h6>
+                                <h6 className="card-title"><strong>Total Other Leaves</strong></h6>
                                 <TotalLeaves className='card-icon-style svg-icon-blue' /> 
                                 <span className='text-align-right card-text-style circle-span-blue'>28</span>
                             </div>
                             </div>
-                        </div>
-                        <div className="col-md-3 mb-3" style={{cursor: "pointer"}}>
+                        </div> : ""}
+                        {isAdmin ?
+                        <div className={`${isAdmin? 'col-md-3 mb-3' : 'col-md-4 mb-3'}`} style={{cursor: "pointer"}}>
                             <div className="card">
                             <div className="card-body">
-                                <h6 className="card-title"><strong>{isAdmin ? 'Total Present Today' : 'Total for year'}</strong></h6>
-                                {isAdmin ? <PresentToday className='card-icon-style svg-icon-blue' />  : <LeaveRequests className='card-icon-style svg-icon-blue' /> }
+                                <h6 className="card-title"><strong>Total Present Today</strong></h6>
+                                <PresentToday className='card-icon-style svg-icon-blue' />
                                 <span className='text-align-right card-text-style circle-span-blue'>7</span>
                             </div>
                             </div>
-                        </div>
-                        <div className="col-md-3 mb-3" style={{cursor: "pointer"}}>
+                        </div> : ""}
+                        <div className={`${isAdmin? 'col-md-3 mb-3' : 'col-md-4 mb-3'}`} style={{cursor: "pointer"}}>
                             <div className="card">
                             <div className="card-body">
                                 <h6 className="card-title"><strong>Approved Leaves</strong></h6>
@@ -273,7 +279,7 @@ export default function Dashboard() {
                             </div>
                             </div>
                         </div>
-                        <div className="col-md-3 mb-3" style={{cursor: "pointer"}}>
+                        <div className={`${isAdmin? 'col-md-3 mb-3' : 'col-md-4 mb-3'}`} style={{cursor: "pointer"}}>
                             <div className="card">
                             <div className="card-body">
                                 <h6 className="card-title"><strong>Declined Leaves</strong></h6>
@@ -282,7 +288,7 @@ export default function Dashboard() {
                             </div>
                             </div>
                         </div>
-                        <div className="col-md-3 mb-3" style={{cursor: "pointer"}}>
+                        <div className={`${isAdmin? 'col-md-3 mb-3' : 'col-md-4 mb-3'}`} style={{cursor: "pointer"}}>
                             <div className="card">
                             <div className="card-body">
                                 <h6 className="card-title"><strong>{isAdmin ? 'Leave Requests' : 'Leaves taken / requested'}</strong></h6>

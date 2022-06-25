@@ -51,7 +51,6 @@ export default function Profile(props) {
         formData.append('about', profile.about)
         formData.append('gender', profile.gender)
         formData.append('image_path', profile.image_path)
-        
         ApiClient.post('/api/employees/add-or-edit-profile/',formData)
         .then(response => {
             if(response.status === 200){
@@ -98,7 +97,6 @@ export default function Profile(props) {
     const handleChange = (event) => {
         setProfile({...profile, image_path: event.target.files[0]})
     };
-    console.log("UserData=>\n", profile)
     return (
         <div className="container mt-5">
             <div className="row justify-content-center">

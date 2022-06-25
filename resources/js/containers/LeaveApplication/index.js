@@ -1,10 +1,10 @@
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {useEffect, useMemo, useState, useRef} from 'react';
 import { createBrowserHistory } from 'history';
 import ApiClient from "../../config";
 import {toast} from "react-toastify";
 import { MDBCard, MDBCardBody, MDBCol, MDBContainer, MDBDataTable, MDBRow } from 'mdbreact';
 import {
-    PowerSettingsNewTwoTone as PowerOff, VisibilityOutlined as ViewRecord, EditOutlined as EditRecord, DeleteOutlineRounded as DeleteRecord, Add as AddLeaveTypesIcon
+    PowerSettingsNewTwoTone as PowerOff, VisibilityOutlined as ViewRecord, EditOutlined as EditRecord, DeleteOutlineRounded as DeleteRecord, Add as AddLeaveTypesIcon, CalendarMonth as TotalLeaves, Sick as SickLeave, Event as CasualLeaves
 } from '@mui/icons-material';
 import moment from 'moment';
 import {Breadcrumbs, Link, Typography} from '@material-ui/core'
@@ -15,8 +15,38 @@ import "react-datepicker/dist/react-datepicker.css";
 export default function LeaveApplication() {
     let history = createBrowserHistory({forceRefresh:true});
     const userDataFetched = JSON.parse(localStorage.getItem('users'));
+    const hiddenFileInput = useRef(null);
+    const [userLeaveData, setUserLeaveData] = useState({
+        id:userDataFetched.id,
+        balanced_leaves: "",
+        c_l: "",
+        s_l: ""
+    });
+    const {id,balanced_leaves,c_l,s_l} = userLeaveData;
+    const [sickData, setSickData] = useState({
+        sick_id: "",
+        attachment: ""
+    });
     const [leaveApplicationsData, setleaveApplicationsData] = useState([]);
     const userData = localStorage.getItem('users');
+    const sendSickDocData = () =>
+    {
+        console.log("Attachment=>", sickData.sick_id);
+
+        // let formData = new FormData()
+        // formData.append('id', sick_id)
+        // formData.append('attachment', attachment)
+        // ApiClient.post('/api/leave-applications/apply-for-sick-doc-approval/',formData)
+        // .then(response => {
+        //     if(response.status === 200){
+        //         toast.success("Document Uploaded Successfully Wait for Response")
+        //         // history.push("/leave-applications")
+        //     }else{
+        //         toast.error('Something went wrong try again')
+        //     }
+        // });
+    }
+
     const logOut = () => {
         if(confirm('Do you want to log out?')) {
             localStorage.removeItem('users')
@@ -37,10 +67,26 @@ export default function LeaveApplication() {
         return statusArray
     }
 
+    useEffect(() => {
+        if(id){
+            ApiClient.get('/api/employees/get-employee/' + id)
+            .then(response => {
+                if(response.data){ 
+                    setUserLeaveData({
+                        balanced_leaves:response.data.balanced_leaves, 
+                        c_l:response.data.c_l, 
+                        s_l:response.data.s_l
+                    })    
+                }else{
+                    toast.error('Something went wrong try again')
+                }
+            });
+        }
+    }, [id]);
+
     useMemo(()=>{
         ApiClient.get('/api/leave-applications/get-all-leave-applications')
         .then(response => {
-            console.log("Response=>", response)
             let postsArray = [];
             JSON.parse(JSON.stringify(response.data)).map((item, index) => {
                 item.ids = (
@@ -49,31 +95,26 @@ export default function LeaveApplication() {
                     </div>
                 );
                 item.leave_type = (
-                    <div className='text-center d-flex align-items-center'>
+                    <div className='d-flex align-items-center'>
                         {item.leave_types.name}
                     </div>
                 );
                 item.from_to_date = (
-                    <div className='text-center d-flex align-items-center'>
-                        {item.from_date + " | " + item.to_date}
+                    <div className='d-flex align-items-center'>
+                        {`"`+item.from_date+`"` + " To " + `"`+item.to_date+`"` + " = (" + (moment(item.to_date).diff(item.from_date, 'days')+1) + " Days)"}
                     </div>
                 );
-                item.no_of_days = (
+                item.upload_sick_doc = (
                     <div className='text-center'>
-                        {moment(item.to_date).diff(item.from_date, 'days')}
+                        <button name='btnSickDoc' className='btn btn-secondary side-link' onClick={handleClick}>Upload Doc</button>
+                        <input type='file' className="d-none" id="sick_doc" name='sick_doc' ref={hiddenFileInput} onChange={(e) => handleSicDocUpload(e, item.id)}/>
+                        <button type="submit" className="btn btn-primary side-link ms-2" onClick={sendSickDocData}>Submit</button>  
                     </div>
                 );
                 item.status = (
                     <div className='text-center'>
                         <div className={`mx-1 rounded ${statusOfLeave(item.leave_status).statusClass}`}>{statusOfLeave(item.leave_status).leaveStatus}</div>
                     </div>
-                );
-                item.action = (
-                    <div className='text-center d-flex'>
-                        <div className='mx-1 rounded custom-actions'>
-                            <ViewRecord className='action-icon-style' onClick={() => {history.push(`/leave-types/edit-leave-types/${item.id}`)}}/>
-                        </div>
-                    </div>  
                 );
                 postsArray.push(item);
             });
@@ -89,7 +130,7 @@ export default function LeaveApplication() {
                 sort: 'asc',
                 width: 150,
                 attributes: {className: 'text-center'}
-                },
+            },
             {
                 label: 'Leave Type',
                 field: 'leave_type',
@@ -103,33 +144,36 @@ export default function LeaveApplication() {
                 width: 150
             },
             {
-                label: 'No. Of Days',
-                field: 'no_of_days',
-                sort: 'asc',
-                width: 150,
-                attributes: {className: 'text-center'}
-            },
-            {
                 label: 'Reason',
                 field: 'reason',
                 sort: 'asc',
                 width: 150
             },
             {
-                label: 'Status',
-                field: 'status',
+                label: 'Upload Sick Doc',
+                field: 'upload_sick_doc',
                 width: 100,
                 attributes: {className: 'text-center'}
             },
             {
-                label: 'Action',
-                field: 'action',
+                label: 'Status',
+                field: 'status',
                 width: 100,
                 attributes: {className: 'text-center'}
             }
         ],
         rows: leaveApplicationsData
     };
+    
+    const handleClick = () => {
+        hiddenFileInput.current.click();
+    }
+
+    const handleSicDocUpload = (event, id) => {
+        setSickData({...sickData, sick_id: id,attachment: event.target.files[0]})
+    };
+
+    console.log("Sick Data=>\n", sickData);
     return (
         <div className="container mt-5">
             <div className="row justify-content-center">
@@ -149,11 +193,41 @@ export default function LeaveApplication() {
                             <span className='text-align-right role-style'><strong>(Role: {userDataFetched.roleName})&nbsp;&nbsp;</strong></span> 
                         </div>
                     </div>
+
+                    <div className="row row-cols-1 row-cols-md-4 mt-3">
+                        <div className="col-md-4 mb-3">
+                            <div className="card violet">
+                            <div className="card-body">
+                                <h6 className="card-title"><strong>Total Leaves So Far</strong></h6>
+                                <TotalLeaves className='card-icon-style svg-icon-violet' />
+                                <span className='text-align-right card-text-style circle-span-violet'>{balanced_leaves}</span>
+                            </div>
+                            </div>
+                        </div>
+                        <div className="col-md-4 mb-3">
+                            <div className="card violet">
+                            <div className="card-body">
+                                <h6 className="card-title"><strong>Casual Leaves You Have</strong></h6>
+                                <CasualLeaves className='card-icon-style svg-icon-teal' />
+                                <span className='text-align-right card-text-style circle-span-teal'>{c_l}</span>
+                            </div>
+                            </div>
+                        </div>
+                        <div className="col-md-4 mb-3">
+                            <div className="card violet">
+                            <div className="card-body">
+                                <h6 className="card-title"><strong>Sick Leaves You Have</strong></h6>
+                                <SickLeave className='card-icon-style svg-icon-red' />
+                                <span className='text-align-right card-text-style circle-span-red'>{s_l}</span>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
                     
-                    <div className="card mt-3">
+                    <div className="card">
                         <div className="card-header">
                             <strong>Leave Requests</strong>
-                            <AddLeaveTypesIcon className='text-align-right add-icon-style' onClick={()=>{history.push('/leave-types/add-leave-types')}}/> 
+                            <a href='' className='btn btn-primary side-link text-align-right' onClick={()=>{history.push('/apply-leave')}}>Apply Leave</a>
                         </div>
                         <div className="card-body">
                             <MDBDataTable

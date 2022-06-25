@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\BaseController as BaseController;
 use App\Models\LeaveType;
 use App\Models\LeaveApplication;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -113,11 +114,13 @@ class LeaveController extends BaseController
         try{
             $user = Auth::user();
             $isLeaveAppExist = LeaveApplication::where('user_id', '=' , $user->id)->where('leave_status', 0)->first();
+            $leaveTypeId = LeaveType::where('name', '=', 'Casual Leave')->first();
             if($isLeaveAppExist){
                 return $this->sendResponse($isLeaveAppExist, 'Leave Application Pending', 201);
             }
+
             $request['user_id'] = $user->id;
-            $request['leave_type_id'] = intval($request->leave_type_id);
+            $request['leave_type_id'] = $leaveTypeId->id;
             $request['date_of_application'] =  Carbon::today()->startOfDay()->format('Y-m-d');
             $data = $request->all();
             $leaveType = LeaveApplication::create($data);
@@ -127,21 +130,27 @@ class LeaveController extends BaseController
         }
     }
 
+    // Actions On Leave
     public function actionOnLeaveApplication(Request $request)
     {
         try{
             $user = Auth::user();
+            $applicantUser = User::find($request->ApplicantId);
             $req['processed_by_id'] = $user->id;
             $req['leave_status'] = intval($request->leaveStatus);
+            $req['date_of_approval'] =  Carbon::today()->startOfDay()->format('Y-m-d');
+            
             if(intval($request->leaveStatus) === 1){
-                $req['date_of_approval'] =  Carbon::today()->startOfDay()->format('Y-m-d');
-            }else{
-                $req['date_of_approval'] = null;
+                $req['c_l'] = $applicantUser->c_l - intval($request->NoOfDays);
             }
+
             $leaveAction = LeaveApplication::where('id',intval($request->leaveAppId))->update(array(
                 'processed_by_id'=>$req['processed_by_id'], 
                 'leave_status'=>$req['leave_status'], 
                 'date_of_approval'=>$req['date_of_approval']
+            ));
+            $userDataUpdate = User::where('id', $request->ApplicantId)->update(array(
+                'c_l'=>$req['c_l'],
             ));
             return $this->sendResponse($leaveAction, 'Leave Application Updated Successfully.', 200);
         }catch (\Exception $e){
@@ -168,5 +177,10 @@ class LeaveController extends BaseController
         }catch (\Exception $e){
             return $this->sendError($e, [], 500);
         }
+    }
+
+    public function applyForSickDocApproval(Request $request)
+    {
+        dd($request);   
     }
 }

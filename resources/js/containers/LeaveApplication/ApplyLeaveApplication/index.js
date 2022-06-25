@@ -4,7 +4,7 @@ import ApiClient from "../../../config";
 import {toast} from "react-toastify";
 import { MDBCard, MDBCardBody, MDBCol, MDBContainer, MDBDataTable, MDBRow } from 'mdbreact';
 import {
-    PowerSettingsNewTwoTone as PowerOff, VisibilityOutlined as ViewRecord, EditOutlined as EditRecord, DeleteOutlineRounded as DeleteRecord, Add as AddLeaveTypesIcon
+    PowerSettingsNewTwoTone as PowerOff, VisibilityOutlined as ViewRecord, EditOutlined as EditRecord, DeleteOutlineRounded as DeleteRecord, Add as AddLeaveTypesIcon, CalendarMonth as TotalLeaves, Sick as SickLeave, Event as CasualLeaves
 } from '@mui/icons-material';
 import moment from 'moment';
 import Flatpickr from 'react-flatpickr';
@@ -17,13 +17,18 @@ import "react-datepicker/dist/react-datepicker.css";
 export default function ApplyLeaveApplication() {
     let history = createBrowserHistory({forceRefresh:true});
     const userDataFetched = JSON.parse(localStorage.getItem('users'));
-    const [allLeaveTypes, setAllLeaveTypes] = useState([])
+    const [userLeaveData, setUserLeaveData] = useState({
+        id:userDataFetched.id,
+        balanced_leaves: "",
+        c_l: "",
+        s_l: ""
+    });
+    const {id,balanced_leaves,c_l,s_l} = userLeaveData;    
     const [day_type, setDayType] = useState(true)
     const [leaveApplication, setLeaveApplication] = useState({
         from_date: '',
         to_date:'',
-        reason:'',
-        leave_type_id:'',
+        reason:''
     });
     const {from_date, to_date} = leaveApplication;
     const skip_weekends = [1,2,3,4,5];
@@ -49,6 +54,23 @@ export default function ApplyLeaveApplication() {
         }
     }
 
+    useEffect(() => {
+        if(id){
+            ApiClient.get('/api/employees/get-employee/' + id)
+            .then(response => {
+                if(response.data){ 
+                    setUserLeaveData({
+                        balanced_leaves:response.data.balanced_leaves, 
+                        c_l:response.data.c_l, 
+                        s_l:response.data.s_l
+                    })    
+                }else{
+                    toast.error('Something went wrong try again')
+                }
+            });
+        }
+    }, [id]);
+
     const enableMonToFriDates = (date) => {
         return skip_weekends.includes(date.getDay());
     };
@@ -60,36 +82,11 @@ export default function ApplyLeaveApplication() {
     const enddateTrigger = (date) => {
         setLeaveApplication({ ...leaveApplication, to_date: moment(date).format('YYYY-MM-DD') });
     };
-    
-    useEffect(() => {
-        ApiClient.get('/api/leave-types/get-all-leave-types/')
-        .then(response => {
-            if(response.data){
-                setAllLeaveTypes(response.data)
-            }else{
-                toast.error('Error in fetching Roles')
-            }
-        });
-    }, []);
-
-    const getAllLeaveTypes = () => {
-        let fetchLeaveTypes = Object.entries(allLeaveTypes).map(([key, val]) => {
-            return <option key={key} value={val.id}>{val.name}</option>
-        });
-        return (
-            <select className="form-control" label="Leave Types" name="leave_type_id" onChange={e => onInputChange(e)}>
-                <option hidden> ---- Select Leave Type ---- </option>
-                {fetchLeaveTypes}
-            </select>
-        )
-    };
 
     const sendLeaveAppData = () =>
     {
         if(leaveApplication.from_date === ''){
             return toast.error('From Date Field is empty')
-        }else if(leaveApplication.leave_type_id === ''){
-            return toast.error('Leave Type Field is empty')
         }else if(leaveApplication.reason === ''){
             return toast.error('Reason Field is empty')
         }
@@ -100,15 +97,14 @@ export default function ApplyLeaveApplication() {
                 toast.error("Leave already applied wait for the response from the admin")
             }else if(response.status === 200){
                 toast.success("Leave Applied Successfully")
-                setLeaveType({from_date:'',to_date:'',reason:'',leave_type_id:''})
+                setLeaveType({from_date:'',to_date:'',reason:''})
             }else{
                 toast.error('Something went wrong try again')
-                setLeaveType({from_date:'',to_date:'',reason:'',leave_type_id:''})
+                setLeaveType({from_date:'',to_date:'',reason:''})
             }
         });
         history.push("/leave-applications")
     }
-    console.log("Leave APP Data =>\n", day_type)
     return (
         <div className="container mt-5">
             <div className="row justify-content-center">
@@ -120,7 +116,7 @@ export default function ApplyLeaveApplication() {
                                 <Link underline="hover" color="inherit" href="/">
                                     Dashboard
                                 </Link>
-                                <Typography className='text-black'>Leave Application</Typography>
+                                <Typography className='text-black'>Apply Leave</Typography>
                             </Breadcrumbs>
                         </div>
                         <div className='col-md-6'>
@@ -128,28 +124,58 @@ export default function ApplyLeaveApplication() {
                             <span className='text-align-right role-style'><strong>(Role: {userDataFetched.roleName})&nbsp;&nbsp;</strong></span> 
                         </div>
                     </div>
+
+                    <div className="row row-cols-1 row-cols-md-4 mt-3">
+                        <div className="col-md-4 mb-3">
+                            <div className="card violet">
+                            <div className="card-body">
+                                <h6 className="card-title"><strong>Total Leaves So Far</strong></h6>
+                                <TotalLeaves className='card-icon-style svg-icon-violet' />
+                                <span className='text-align-right card-text-style circle-span-violet'>{balanced_leaves}</span>
+                            </div>
+                            </div>
+                        </div>
+                        <div className="col-md-4 mb-3">
+                            <div className="card violet">
+                            <div className="card-body">
+                                <h6 className="card-title"><strong>Casual Leaves You Have</strong></h6>
+                                <CasualLeaves className='card-icon-style svg-icon-teal' />
+                                <span className='text-align-right card-text-style circle-span-teal'>{c_l}</span>
+                            </div>
+                            </div>
+                        </div>
+                        <div className="col-md-4 mb-3">
+                            <div className="card violet">
+                            <div className="card-body">
+                                <h6 className="card-title"><strong>Sick Leaves You Have</strong></h6>
+                                <SickLeave className='card-icon-style svg-icon-red' />
+                                <span className='text-align-right card-text-style circle-span-red'>{s_l}</span>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div className='row'>
                         <div className='col-md-7'>
-                            <div className="card mt-3">
+                            <div className="card">
                                 <div className="card-header">
                                     <strong>Leave Application Form</strong>
+                                    <a href='' className='btn btn-primary side-link text-align-right' onClick={()=>{history.push('/leave-applications')}}>View Leave Applications</a>
                                 </div>
                                 <div className="card-body">
                                     <div className="row">
-                                        <div className="form-group mt-2 col-sm-6">
+                                        <div className="form-group mt-2">
+                                            <label htmlFor="day_type">Select No. Of Days Type:</label>
                                             <select className="form-control custom-options" label="day_type" name="day_type" onChange={e => onInputChange(e)} defaultValue={true}>
-                                                <option hidden> - Select No. Of Days Type - </option>
                                                 <option value={true}>One Day</option>
                                                 <option value={false}>More than One Day</option>
                                             </select>
                                         </div>
-                                        <div className="form-group mt-2 col-sm-6">
-                                            {getAllLeaveTypes()}
-                                        </div>
                                     </div>
                                     {day_type ?
                                     <div className="row">
-                                        <div className='form-group mt-3'>
+                                        <div className='form-group mt-1'>
+                                            <label htmlFor="from_date">Select a Date</label>
                                             <DatePicker
                                                 name="from_date"
                                                 className="form-control"
@@ -169,7 +195,8 @@ export default function ApplyLeaveApplication() {
                                     </div>
                                     :
                                     <div className="row">
-                                        <div className="form-group mt-3 col-sm-6">
+                                        <div className="form-group mt-1 col-sm-6">
+                                            <label htmlFor="from_date">Select From Date</label>
                                             <DatePicker
                                                 name="from_date"
                                                 className="form-control"
@@ -186,7 +213,8 @@ export default function ApplyLeaveApplication() {
                                                 value={from_date}
                                             />
                                         </div>
-                                        <div className="form-group mt-3 col-sm-6">
+                                        <div className="form-group mt-1 col-sm-6">
+                                            <label htmlFor="to_date">Select From Date</label>
                                             <DatePicker
                                                 name="to_date"
                                                 className="form-control"
@@ -204,12 +232,13 @@ export default function ApplyLeaveApplication() {
                                             />
                                         </div>
                                     </div>}
-                                    <div className='form-group mt-2'>
+                                    {/* <div className='form-group mt-2'>
                                         <label htmlFor="to_date">Attachment If any:</label>
                                         <input type="file" className="form-control" label="Attachment" name="attachment" onChange={e => onInputChange(e)} required/>
-                                    </div>
-                                    <div className="form-group mt-3">
-                                        <textarea defaultValue={''} className='form-control' name='reason' rows="3" placeholder="Provide a reason for the leave.." onChange={e => onInputChange(e)}></textarea>
+                                    </div> */}
+                                    <div className="form-group mt-1">
+                                        <label htmlFor="to_date">Provide a valid reason</label>
+                                        <textarea defaultValue={''} className='form-control' name='reason' rows="4" placeholder="Write here.." onChange={e => onInputChange(e)}></textarea>
                                     </div>
                                     <hr/>
                                     <button type="submit" className="btn btn-primary" onClick={sendLeaveAppData}>Submit</button>  
@@ -217,7 +246,7 @@ export default function ApplyLeaveApplication() {
                             </div>
                         </div>
                         <div className='col-md-5'>
-                            <div className="card mt-3">
+                            <div className="card">
                                 <div className="card-header">
                                     <strong>Leave Calender - (View Only)</strong>
                                 </div>
