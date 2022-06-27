@@ -21,13 +21,30 @@ export default function Dashboard() {
         first_name: "",
         last_name: "",
         image_path: "",
+        balanced_leaves: "",
+        c_l: "",
+        s_l: ""
     });
-    const {first_name, last_name, image_path} = userData;
+    const {first_name, last_name, image_path, balanced_leaves, c_l, s_l} = userData;
     const [selectedDoc, setSelectedDoc] = useState('');
     const [open, setOpen] = useState(false);
-    const handleAlertMessage = (data) => {
-        console.log(data)
-        setSelectedDoc(data);
+    const onInputChange = (e) => {
+        setSelectedDoc({...selectedDoc, 'sickRemark': e.target.value});
+    };
+    const onhandleSickRemark = () => {
+        ApiClient.post('/api/leave-applications/put-sick-remark/', selectedDoc)
+        .then(response => {
+            if(response.status === 200){
+                toast.success("Sick Remark Posted Successfully")
+                history.push("/")
+            }else{
+                toast.error('Something went wrong try again')
+            }
+        });
+    }
+    const handleAlertMessage = (id, data, sickRemark, status) => {
+        let leaveData = {'leaveAppId':id, 'sickDoc': data, 'sickRemark': sickRemark, 'leaveStatus': status}
+        setSelectedDoc(leaveData);
         setOpen(true);
     };
     const handleClose = () => {
@@ -46,7 +63,14 @@ export default function Dashboard() {
             ApiClient.get('/api/employees/get-employee/' + userDataFetched.id)
             .then(response => {
                 if(response.data){ 
-                    setUserData({first_name:response.data.first_name, last_name:response.data.last_name, image_path: response.data.profiles ? response.data.profiles.image_path : null})    
+                    setUserData({
+                        first_name:response.data.first_name, 
+                        last_name:response.data.last_name, 
+                        image_path: response.data.profiles ? response.data.profiles.image_path : null,
+                        balanced_leaves: response.data.balanced_leaves,
+                        c_l: response.data.c_l,
+                        s_l: response.data.s_l
+                    })    
                 }else{
                     toast.error('Something went wrong try again')
                 }
@@ -102,7 +126,7 @@ export default function Dashboard() {
                 item.sick_doc = (
                     item.attachment ? 
                     <div className='text-center'>
-                        <button name='btnSickDoc' onClick={()=> handleAlertMessage(item.attachment)} className='custom-badge-upload'>View Document</button>
+                        <button name='btnSickDoc' onClick={()=> handleAlertMessage(item.id, item.attachment, item.sick_remark, item.leave_status)} className='custom-badge-upload'>View Document</button>
                     </div> : 
                     <div className='mx-1 rounded custom-actions'>
                         N / A
@@ -181,6 +205,7 @@ export default function Dashboard() {
         ],
         rows: leaveApplicationsData
     };
+    
     return (
         <div className="container mt-5">
             <div className="row justify-content-center">
@@ -242,7 +267,7 @@ export default function Dashboard() {
                             <div className="card-body">
                                 <h6 className="card-title"><strong>{isAdmin ? 'Total Employees' : 'Leaves You Have so far'}</strong></h6>
                                 {isAdmin ? <TotalEmployees className='card-icon-style svg-icon-violet' /> : <TotalLeaves className='card-icon-style svg-icon-violet' />}
-                                <span className='text-align-right card-text-style circle-span-violet'>20</span>
+                                <span className='text-align-right card-text-style circle-span-violet'>{isAdmin ? 20 : balanced_leaves}</span>
                             </div>
                             </div>
                         </div>
@@ -251,7 +276,7 @@ export default function Dashboard() {
                             <div className="card-body">
                                 <h6 className="card-title"><strong>Casual Leaves you have</strong></h6>
                                 <CasualLeaves className='card-icon-style svg-icon-red' /> 
-                                <span className='text-align-right card-text-style circle-span-red'>10</span>
+                                <span className='text-align-right card-text-style circle-span-red'>{isAdmin ? 20 : c_l}</span>
                             </div>
                             </div>
                         </div>
@@ -260,7 +285,7 @@ export default function Dashboard() {
                             <div className="card-body">
                                 <h6 className="card-title"><strong>Sick Leaves you have</strong></h6>
                                 <SickLeave className='card-icon-style svg-icon-teal' /> 
-                                <span className='text-align-right card-text-style circle-span-teal'>3</span>
+                                <span className='text-align-right card-text-style circle-span-teal'>{isAdmin ? 20 : s_l}</span>
                             </div>
                             </div>
                         </div>
@@ -329,13 +354,23 @@ export default function Dashboard() {
                     </div> : ''}
 
                     {isAdmin ?
-                    <Dialog key={selectedDoc} open={open} onClose={handleClose}>
+                    <Dialog key={selectedDoc.leaveAppId} open={open} onClose={handleClose}>
                         <div className="card-header">
                             <strong>Medical Document</strong>
                             <RejectLeave className='text-align-right close-icon-style' onClick={handleClose}/>    
                         </div>
                         <DialogContent className='dialog-overflow'>
-                            <img src={`images/sickDocs/${selectedDoc}`} className="view-sick-doc"/>
+                            {selectedDoc.sickRemark && selectedDoc.leaveStatus !== 0 ? 
+                                <div className="alert alert-secondary p-1 m-2">
+                                    <strong>Remark :</strong> {selectedDoc.sickRemark}
+                                </div> :
+                                <div className='d-flex mt-1 p-2'>
+                                    <textarea defaultValue={''} className='form-control' name='sick_remark' rows="1" placeholder="Any Remarks.." onChange={e => onInputChange(e)}></textarea>
+                                    <button type='submit' className='btn btn-primary ms-2' onClick={onhandleSickRemark}>Submit</button>
+                                </div>
+                            }
+                            <hr style={{margin: '5px 5px 0px 0px'}}/>
+                            <img src={`images/sickDocs/${selectedDoc.sickDoc}`} className="view-sick-doc"/>
                         </DialogContent>
                     </Dialog> : ''}
                 </div>

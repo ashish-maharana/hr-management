@@ -29,8 +29,9 @@ export default function LeaveApplication() {
     const userData = localStorage.getItem('users');
     const [selectedDoc, setSelectedDoc] = useState('');
     const [open, setOpen] = useState(false);
-    const handleAlertMessage = (data) => {
-        setSelectedDoc(data);
+    const handleAlertMessage = (id, data, sickRemark, status) => {
+        let leaveData = {'leaveAppId':id, 'sickDoc': data, 'sickRemark': sickRemark, 'leaveStatus': status}
+        setSelectedDoc(leaveData);
         setOpen(true);
     };
     const handleClose = () => {
@@ -96,7 +97,7 @@ export default function LeaveApplication() {
                 item.upload_sick_doc = (
                     item.attachment ? 
                     <div className='text-center'>
-                        <button name='btnSickDoc' onClick={()=> handleAlertMessage(item.attachment)} className='custom-badge-upload'>View Document</button>
+                        <button name='btnSickDoc' onClick={()=> handleAlertMessage(item.id, item.attachment, item.sick_remark, item.leave_status)} className='custom-badge-upload'>View Document</button>
                     </div> : 
                     <div className='text-center'>
                         <button name='btnSickDoc' className='custom-badge-upload' onClick={handleClick}>Upload Doc</button>
@@ -247,7 +248,12 @@ export default function LeaveApplication() {
                             <CloseModal className='text-align-right close-icon-style' onClick={handleClose}/>    
                         </div>
                         <DialogContent className='dialog-overflow'>
-                            <img src={`images/sickDocs/${selectedDoc}`} className="view-sick-doc"/>
+                        {selectedDoc.sickRemark && selectedDoc.leaveStatus !== 0 ? 
+                            <div className="alert alert-secondary p-1 m-2">
+                                <strong>Remark :</strong> {selectedDoc.sickRemark}
+                            </div> : ''}
+                            <hr style={{margin: '5px 5px 0px 0px'}}/>
+                            <img src={`images/sickDocs/${selectedDoc.sickDoc}`} className="view-sick-doc"/>
                         </DialogContent>
                     </Dialog>
                 </div>

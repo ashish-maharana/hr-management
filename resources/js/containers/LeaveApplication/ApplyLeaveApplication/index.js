@@ -232,10 +232,6 @@ export default function ApplyLeaveApplication() {
                                             />
                                         </div>
                                     </div>}
-                                    {/* <div className='form-group mt-2'>
-                                        <label htmlFor="to_date">Attachment If any:</label>
-                                        <input type="file" className="form-control" label="Attachment" name="attachment" onChange={e => onInputChange(e)} required/>
-                                    </div> */}
                                     <div className="form-group mt-1">
                                         <label htmlFor="to_date">Provide a valid reason</label>
                                         <textarea defaultValue={''} className='form-control' name='reason' rows="4" placeholder="Write here.." onChange={e => onInputChange(e)}></textarea>

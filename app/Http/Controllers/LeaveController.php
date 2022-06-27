@@ -217,4 +217,16 @@ class LeaveController extends BaseController
             return $this->sendError($e, [], 500);
         }
     }
+
+    public function putSickRemark(Request $request)
+    {
+        try {
+            $sickRemark = LeaveApplication::where('id',intval($request->leaveAppId))->update(array(
+                'sick_remark'=>$request->sickRemark??null, 
+            ));
+            return $this->sendResponse($sickRemark, 'Sick Remark Posted Successfully.', 200);
+        } catch (\Exception $e) {
+            return $this->sendError($e, [], 500);
+        }
+    }
 }
