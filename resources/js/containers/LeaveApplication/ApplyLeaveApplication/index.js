@@ -2,7 +2,6 @@ import React, {useEffect, useMemo, useState} from 'react';
 import { createBrowserHistory } from 'history';
 import ApiClient from "../../../config";
 import {toast} from "react-toastify";
-import { MDBCard, MDBCardBody, MDBCol, MDBContainer, MDBDataTable, MDBRow } from 'mdbreact';
 import {
     PowerSettingsNewTwoTone as PowerOff, VisibilityOutlined as ViewRecord, EditOutlined as EditRecord, DeleteOutlineRounded as DeleteRecord, Add as AddLeaveTypesIcon, CalendarMonth as TotalLeaves, Sick as SickLeave, Event as CasualLeaves
 } from '@mui/icons-material';

@@ -251,7 +251,9 @@ export default function LeaveApplication() {
                         {selectedDoc.sickRemark && selectedDoc.leaveStatus !== 0 ? 
                             <div className="alert alert-secondary p-1 m-2">
                                 <strong>Remark :</strong> {selectedDoc.sickRemark}
-                            </div> : ''}
+                            </div> : <div className="alert alert-secondary p-1 m-2">
+                                <strong>Remark :</strong> No Remarks Yet
+                            </div>}
                             <hr style={{margin: '5px 5px 0px 0px'}}/>
                             <img src={`images/sickDocs/${selectedDoc.sickDoc}`} className="view-sick-doc"/>
                         </DialogContent>

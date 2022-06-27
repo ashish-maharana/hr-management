@@ -175,7 +175,7 @@ export default function Employees() {
                             <CloseModal className='text-align-right close-icon-style' onClick={handleClose}/>    
                         </div>
                         <DialogContent>
-                            <div className='d-flex align-items-center'>
+                            <div className='d-flex align-items-center px-2 mt-3'>
                                 <StyledBadge overlap="circular" anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }} variant="dot">
                                     <Avatar 
                                         alt={selectedUser.first_name + " " + selectedUser.last_name} 
