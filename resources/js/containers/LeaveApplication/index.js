@@ -103,7 +103,7 @@ export default function LeaveApplication() {
                         <button name='btnSickDoc' className='custom-badge-upload' onClick={handleClick}>Upload Doc</button>
                         <input type='file' className="d-none" id="sick_doc" name='sick_doc' ref={hiddenFileInput} onChange={(e) => handleSicDocUpload(e, item.id)}/> 
                     </div> 
-                );
+                ); 
                 item.status = (
                     <div className='text-center'>
                         <div className={`mx-1 rounded ${statusOfLeave(item.leave_status).statusClass}`}>{statusOfLeave(item.leave_status).leaveStatus}</div>

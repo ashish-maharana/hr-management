@@ -24,7 +24,7 @@ class CreateLeaveApplicationTable extends Migration
             $table->longText('attachment')->nullable();
             $table->tinyInteger('leave_status')->comment('0->pending 1->approved 2->rejected')->default(0);
             $table->text('reason');
-            $table->date('date_of_approval')->nullable();;
+            $table->date('date_of_action')->nullable();;
 
             $table->foreign('leave_type_id')->references('id')->on('leave_types')
                 ->onUpdate('cascade')->onDelete('cascade'); 

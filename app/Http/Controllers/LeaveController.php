@@ -108,7 +108,27 @@ class LeaveController extends BaseController
     }
 
     // Leave Application API's
+    public function getAllLeaveApplicationsOfEmp()
+    {
+        try{
+            $user = Auth::user();
+            $leaveApplication = LeaveApplication::with('leaveTypes')->where('user_id', '=' , $user->id)->get();
+            return response()->json($leaveApplication->toArray());
+        }catch (\Exception $e){
+            return $this->sendError($e, [], 500);
+        }
+    }
 
+    public function getAllLeaveApplications()
+    {
+        try{
+            $leaveApplication = LeaveApplication::with('leaveTypes')->get();
+            return response()->json($leaveApplication->toArray());
+        }catch (\Exception $e){
+            return $this->sendError($e, [], 500);
+        }
+    }
+    
     public function applyLeaveApplication(Request $request)
     {
         try{
@@ -138,7 +158,7 @@ class LeaveController extends BaseController
             $applicantUser = User::find($request->ApplicantId);
             $req['processed_by_id'] = $user->id;
             $req['leave_status'] = intval($request->leaveStatus);
-            $req['date_of_approval'] =  Carbon::today()->startOfDay()->format('Y-m-d');
+            $req['date_of_action'] =  Carbon::today()->startOfDay()->format('Y-m-d');
             $req['c_l'] = $applicantUser->c_l;
             $req['s_l'] = $applicantUser->s_l;
             $req['balanced_leaves'] = $applicantUser->balanced_leaves;
@@ -158,7 +178,7 @@ class LeaveController extends BaseController
             $leaveAction = LeaveApplication::where('id',intval($request->leaveAppId))->update(array(
                 'processed_by_id'=>$req['processed_by_id'], 
                 'leave_status'=>$req['leave_status'], 
-                'date_of_approval'=>$req['date_of_approval']
+                'date_of_action'=>$req['date_of_action']
             ));
             $userDataUpdate = User::where('id', $request->ApplicantId)->update(array(
                 'c_l'=>$req['c_l'],
@@ -166,27 +186,6 @@ class LeaveController extends BaseController
                 'balanced_leaves'=>$req['balanced_leaves'],
             ));
             return $this->sendResponse($leaveAction, 'Leave Application Updated Successfully.', 200);
-        }catch (\Exception $e){
-            return $this->sendError($e, [], 500);
-        }
-    }
-
-    public function getAllLeaveApplicationsOfEmp()
-    {
-        try{
-            $user = Auth::user();
-            $leaveApplication = LeaveApplication::with('leaveTypes')->where('user_id', '=' , $user->id)->get();
-            return response()->json($leaveApplication->toArray());
-        }catch (\Exception $e){
-            return $this->sendError($e, [], 500);
-        }
-    }
-
-    public function getAllLeaveApplications()
-    {
-        try{
-            $leaveApplication = LeaveApplication::with('leaveTypes')->get();
-            return response()->json($leaveApplication->toArray());
         }catch (\Exception $e){
             return $this->sendError($e, [], 500);
         }
@@ -223,6 +222,7 @@ class LeaveController extends BaseController
         try {
             $sickRemark = LeaveApplication::where('id',intval($request->leaveAppId))->update(array(
                 'sick_remark'=>$request->sickRemark??null, 
+                'leave_type_id' => 2
             ));
             return $this->sendResponse($sickRemark, 'Sick Remark Posted Successfully.', 200);
         } catch (\Exception $e) {

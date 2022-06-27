@@ -10,6 +10,8 @@ import moment from 'moment';
 import { StyledBadge } from '../../components/custom-components';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
+import 'rsuite/dist/styles/rsuite-default.css';
+import { PieChart } from '@rsuite/charts';
 
 export default function Dashboard() {
     let history = createBrowserHistory({forceRefresh:true});
@@ -28,6 +30,10 @@ export default function Dashboard() {
     const {first_name, last_name, image_path, balanced_leaves, c_l, s_l} = userData;
     const [selectedDoc, setSelectedDoc] = useState('');
     const [open, setOpen] = useState(false);
+    const leaveDataChart = [
+        ['Sick Leaves', 30],
+        ['Casual Leaves', 40]
+    ];
     const onInputChange = (e) => {
         setSelectedDoc({...selectedDoc, 'sickRemark': e.target.value});
     };
@@ -261,36 +267,36 @@ export default function Dashboard() {
                             </div>
                         </div>
                     </div>
+                    {isAdmin ?
                     <div className="row row-cols-1 row-cols-md-4 mt-3">
-                        <div className={`${isAdmin? 'col-md-3 mb-3' : 'col-md-4 mb-3'}`} onClick={()=>{isAdmin ? history.push("/employees") : ''}} style={{cursor: "pointer"}}>
+                        <div className='col-md-3 mb-3' onClick={()=>{history.push("/employees")}} style={{cursor: "pointer"}}>
                             <div className="card violet">
                             <div className="card-body">
-                                <h6 className="card-title"><strong>{isAdmin ? 'Total Employees' : 'Leaves You Have so far'}</strong></h6>
-                                {isAdmin ? <TotalEmployees className='card-icon-style svg-icon-violet' /> : <TotalLeaves className='card-icon-style svg-icon-violet' />}
-                                <span className='text-align-right card-text-style circle-span-violet'>{isAdmin ? 20 : balanced_leaves}</span>
+                                <h6 className="card-title"><strong>Total Employees</strong></h6>
+                                <TotalEmployees className='card-icon-style svg-icon-violet' />
+                                <span className='text-align-right card-text-style circle-span-violet'>20</span>
                             </div>
                             </div>
                         </div>
-                        <div className={`${isAdmin? 'col-md-3 mb-3' : 'col-md-4 mb-3'}`} style={{cursor: "pointer"}}>
+                        <div className='col-md-3 mb-3' style={{cursor: "pointer"}}>
                             <div className="card red">
                             <div className="card-body">
                                 <h6 className="card-title"><strong>Casual Leaves you have</strong></h6>
                                 <CasualLeaves className='card-icon-style svg-icon-red' /> 
-                                <span className='text-align-right card-text-style circle-span-red'>{isAdmin ? 20 : c_l}</span>
+                                <span className='text-align-right card-text-style circle-span-red'>20</span>
                             </div>
                             </div>
                         </div>
-                        <div className={`${isAdmin? 'col-md-3 mb-3' : 'col-md-4 mb-3'}`} style={{cursor: "pointer"}}>
+                        <div className='col-md-3 mb-3' style={{cursor: "pointer"}}>
                             <div className="card teal">
                             <div className="card-body">
                                 <h6 className="card-title"><strong>Sick Leaves you have</strong></h6>
                                 <SickLeave className='card-icon-style svg-icon-teal' /> 
-                                <span className='text-align-right card-text-style circle-span-teal'>{isAdmin ? 20 : s_l}</span>
+                                <span className='text-align-right card-text-style circle-span-teal'>20</span>
                             </div>
                             </div>
                         </div>
-                        {isAdmin ?
-                        <div className={`${isAdmin? 'col-md-3 mb-3' : 'col-md-4 mb-3'}`} style={{cursor: "pointer"}}>
+                        <div className='col-md-3 mb-3' style={{cursor: "pointer"}}>
                             <div className="card blue">
                             <div className="card-body">
                                 <h6 className="card-title"><strong>Total Other Leaves</strong></h6>
@@ -298,9 +304,8 @@ export default function Dashboard() {
                                 <span className='text-align-right card-text-style circle-span-blue'>28</span>
                             </div>
                             </div>
-                        </div> : ""}
-                        {isAdmin ?
-                        <div className={`${isAdmin? 'col-md-3 mb-3' : 'col-md-4 mb-3'}`} style={{cursor: "pointer"}}>
+                        </div>                        
+                        <div className='col-md-3 mb-3' style={{cursor: "pointer"}}>
                             <div className="card">
                             <div className="card-body">
                                 <h6 className="card-title"><strong>Total Present Today</strong></h6>
@@ -308,8 +313,8 @@ export default function Dashboard() {
                                 <span className='text-align-right card-text-style circle-span-blue'>7</span>
                             </div>
                             </div>
-                        </div> : ""}
-                        <div className={`${isAdmin? 'col-md-3 mb-3' : 'col-md-4 mb-3'}`} style={{cursor: "pointer"}}>
+                        </div>
+                        <div className='col-md-3 mb-3' style={{cursor: "pointer"}}>
                             <div className="card">
                             <div className="card-body">
                                 <h6 className="card-title"><strong>Approved Leaves</strong></h6>
@@ -318,7 +323,7 @@ export default function Dashboard() {
                             </div>
                             </div>
                         </div>
-                        <div className={`${isAdmin? 'col-md-3 mb-3' : 'col-md-4 mb-3'}`} style={{cursor: "pointer"}}>
+                        <div className='col-md-3 mb-3' style={{cursor: "pointer"}}>
                             <div className="card">
                             <div className="card-body">
                                 <h6 className="card-title"><strong>Declined Leaves</strong></h6>
@@ -327,16 +332,76 @@ export default function Dashboard() {
                             </div>
                             </div>
                         </div>
-                        <div className={`${isAdmin? 'col-md-3 mb-3' : 'col-md-4 mb-3'}`} style={{cursor: "pointer"}}>
+                        <div className='col-md-3 mb-3' style={{cursor: "pointer"}}>
                             <div className="card">
                             <div className="card-body">
-                                <h6 className="card-title"><strong>{isAdmin ? 'Leave Requests' : 'Leaves taken / requested'}</strong></h6>
-                                {isAdmin ? <LeaveRequests className='card-icon-style svg-icon-violet' /> : <LeaveRequests className='card-icon-style svg-icon-violet' /> }
+                                <h6 className="card-title"><strong>Leave Requests</strong></h6>
+                                <LeaveRequests className='card-icon-style svg-icon-violet' />
                                 <span className='text-align-right card-text-style circle-span-violet'>5</span>
                             </div>
                             </div>
                         </div>
                     </div>
+                    :
+                    <div className="row row-cols-1 row-cols-md-4 mt-3">
+                        <div className="col-md-4 mb-3">
+                            <div className="card violet">
+                            <div className="card-body">
+                                <h6 className="card-title"><strong>Total Leaves So Far</strong></h6>
+                                <TotalLeaves className='card-icon-style svg-icon-violet' />
+                                <span className='text-align-right card-text-style circle-span-violet'>{balanced_leaves}</span>
+                            </div>
+                            </div>
+                        </div>
+                        <div className="col-md-4 mb-3">
+                            <div className="card violet">
+                            <div className="card-body">
+                                <h6 className="card-title"><strong>Sick Leaves You Have</strong></h6>
+                                <SickLeave className='card-icon-style svg-icon-red' />
+                                <span className='text-align-right card-text-style circle-span-red'>{s_l}</span>
+                            </div>
+                            </div>
+                        </div>
+                        <div className="col-md-4 mb-3">
+                            <div className="card violet">
+                            <div className="card-body">
+                                <h6 className="card-title"><strong>Casual Leaves You Have</strong></h6>
+                                <CasualLeaves className='card-icon-style svg-icon-teal' />
+                                <span className='text-align-right card-text-style circle-span-teal'>{c_l}</span>
+                            </div>
+                            </div>
+                        </div>
+                        <div className="col-md-4 mb-3">
+                            <div className="card violet">
+                            <div className="card-body">
+                                <h6 className="card-title"><strong>Approved Leaves</strong></h6>
+                                <ApproveLeave className='card-icon-style svg-icon-teal' />
+                                <span className='text-align-right card-text-style circle-span-teal'>{c_l}</span>
+                            </div>
+                            </div>
+                        </div>
+                        <div className="col-md-4 mb-3">
+                            <div className="card violet">
+                            <div className="card-body">
+                                <h6 className="card-title"><strong>Rejected Leaves</strong></h6>
+                                <RejectLeave className='card-icon-style svg-icon-red' />
+                                <span className='text-align-right card-text-style circle-span-red'>{s_l}</span>
+                            </div>
+                            </div>
+                        </div>
+                        <div className="col-md-4 mb-3">
+                            <div className="card violet">
+                            <div className="card-body">
+                                <h6 className="card-title"><strong>Leaves Requests Till Now</strong></h6>
+                                <TotalLeaves className='card-icon-style svg-icon-violet' />
+                                <span className='text-align-right card-text-style circle-span-violet'>{s_l}</span>
+                            </div>
+                            </div>
+                        </div>
+                    </div>}
+                    
+                    <PieChart name="PieChart" data={leaveDataChart} />
+
                     {isAdmin ?
                     <div className="card">
                         <div className="card-header">
