@@ -10,8 +10,6 @@ import moment from 'moment';
 import { StyledBadge } from '../../components/custom-components';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
-import 'rsuite/dist/styles/rsuite-default.css';
-import { PieChart } from '@rsuite/charts';
 
 export default function Dashboard() {
     let history = createBrowserHistory({forceRefresh:true});
@@ -400,8 +398,6 @@ export default function Dashboard() {
                         </div>
                     </div>}
                     
-                    <PieChart name="PieChart" data={leaveDataChart} />
-
                     {isAdmin ?
                     <div className="card">
                         <div className="card-header">
