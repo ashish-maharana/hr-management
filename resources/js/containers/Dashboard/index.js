@@ -261,7 +261,6 @@ export default function Dashboard() {
         ],
         rows: leaveApplicationsData
     };
-    
     return (
         <div className="container mt-5">
             <div className="row justify-content-center">
@@ -465,11 +464,12 @@ export default function Dashboard() {
                             />
                         </div>
                     </div> : ''}
+
                     {!isAdmin ?
                     <div className="row row-cols-1 row-cols-md-4">
                         <div className="col-md-6 mb-3">
                             <div className="card">
-                            <div class="card-header"><strong>Leavetypes Percentage Report</strong></div>
+                            <div className="card-header"><strong>Leavetypes Percentage Report</strong></div>
                             <div className="card-body custom-chart-size">
                                 <LeaveTypesReport 
                                     height={300}
@@ -482,7 +482,7 @@ export default function Dashboard() {
                         </div>
                         <div className="col-md-6 mb-3">
                             <div className="card">
-                            <div class="card-header"><strong>Leavetypes Status Report</strong></div>
+                            <div className="card-header"><strong>Leavetypes Status Report</strong></div>
                             <div className="card-body custom-chart-size">
                                 <LeaveTypesReportBar 
                                     height={300}
@@ -494,7 +494,7 @@ export default function Dashboard() {
                             </div>
                         </div>
                     </div> : ""}
-           
+
                     {isAdmin ?
                     <Dialog key={selectedDoc.leaveAppId} open={open} onClose={handleClose}>
                         <div className="card-header">

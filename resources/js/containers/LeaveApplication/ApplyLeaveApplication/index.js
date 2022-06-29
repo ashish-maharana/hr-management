@@ -159,7 +159,7 @@ export default function ApplyLeaveApplication() {
                             <div className="card">
                                 <div className="card-header">
                                     <strong>Leave Application Form</strong>
-                                    <a href='' className='btn btn-primary side-link text-align-right' onClick={()=>{history.push('/leave-applications')}}>View Leave Applications</a>
+                                    <span className='btn btn-primary side-link text-align-right' onClick={()=>{history.push('/leave-applications')}}>View Leave Applications</span>
                                 </div>
                                 <div className="card-body">
                                     <div className="row">
