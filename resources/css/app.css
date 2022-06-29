@@ -488,3 +488,6 @@ td:first-child {
 .MuiDialogContent-root {
     padding: 0rem!important;
 }
+.custom-chart-size{
+    padding: 1rem 2rem!important;
+}

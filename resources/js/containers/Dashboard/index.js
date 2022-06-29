@@ -10,6 +10,9 @@ import moment from 'moment';
 import { StyledBadge } from '../../components/custom-components';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
+import { Pie as LeaveTypesReport, Bar as LeaveTypesReportBar} from 'react-chartjs-2';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement} from 'chart.js';
+ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement);
 
 export default function Dashboard() {
     let history = createBrowserHistory({forceRefresh:true});
@@ -28,10 +31,59 @@ export default function Dashboard() {
     const {first_name, last_name, image_path, balanced_leaves, c_l, s_l} = userData;
     const [selectedDoc, setSelectedDoc] = useState('');
     const [open, setOpen] = useState(false);
-    const leaveDataChart = [
-        ['Sick Leaves', 30],
-        ['Casual Leaves', 40]
-    ];
+    const leaveTypesPieData = {
+        labels: ['Sick Leaves', 'Casual Leaves'],
+        datasets: [
+          {
+            label: 'Leave Types Records',
+            data: [30, 70],
+            backgroundColor: [
+              'rgba(255, 99, 132, 0.2)',
+              'rgba(54, 162, 235, 0.2)',
+            ],
+            borderColor: [
+              'rgba(255, 99, 132, 1)',
+              'rgba(54, 162, 235, 1)',
+            ],
+            borderWidth: 1,
+          },
+        ],
+    };
+    const leaveTypesBarData = {
+        labels: ['Declined Leaves', 'Approved Leaves'],
+        datasets: [
+          {
+            label: 'Leave Types Records',
+            data: [35, 65],
+            backgroundColor: [
+              'rgba(255, 99, 132, 0.2)',
+              'rgba(54, 162, 235, 0.2)',
+            ],
+            borderColor: [
+              'rgba(255, 99, 132, 1)',
+              'rgba(54, 162, 235, 1)',
+            ],
+            borderWidth: 1,
+          },
+        ],
+    };
+    const leavetypePieOptions = {
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: true,
+                position: 'right'
+            }
+        }
+    };
+    const leavetypeBarOptions = {
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false
+            }
+        }
+    };
     const onInputChange = (e) => {
         setSelectedDoc({...selectedDoc, 'sickRemark': e.target.value});
     };
@@ -413,7 +465,36 @@ export default function Dashboard() {
                             />
                         </div>
                     </div> : ''}
-
+                    {!isAdmin ?
+                    <div className="row row-cols-1 row-cols-md-4">
+                        <div className="col-md-6 mb-3">
+                            <div className="card">
+                            <div class="card-header"><strong>Leavetypes Percentage Report</strong></div>
+                            <div className="card-body custom-chart-size">
+                                <LeaveTypesReport 
+                                    height={300}
+                                    width={300}
+                                    data={leaveTypesPieData} 
+                                    options={leavetypePieOptions}
+                                /> 
+                            </div>
+                            </div>
+                        </div>
+                        <div className="col-md-6 mb-3">
+                            <div className="card">
+                            <div class="card-header"><strong>Leavetypes Status Report</strong></div>
+                            <div className="card-body custom-chart-size">
+                                <LeaveTypesReportBar 
+                                    height={300}
+                                    width={300}
+                                    data={leaveTypesBarData} 
+                                    options={leavetypeBarOptions}
+                                /> 
+                            </div>
+                            </div>
+                        </div>
+                    </div> : ""}
+           
                     {isAdmin ?
                     <Dialog key={selectedDoc.leaveAppId} open={open} onClose={handleClose}>
                         <div className="card-header">
